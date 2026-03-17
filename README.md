@@ -21,11 +21,11 @@ O software opera como um pipeline de dados simples:
 * **CI/CD:** GitHub Actions (Planejado para Sprints futuras)
 
 ## 👥 Equipe
-* Gustavo Antony Petrolini 10724112917 - Engenharia de Dados / Backend
-* [Nome do Amigo 1] - [Papel]
-* [Nome do Amigo 2] - [Papel]
-* [Nome do Amigo 3] - [Papel]
-* [Nome do Amigo 4] - [Papel]
+* Gustavo Petrolini 10724112917 - Engenharia de Dados / Backend
+* Gustavo Perino 1072412639 - [Papel]
+* Leonardo Vivan 1072416471 - [Papel]
+* Tiago Machado 1072410017- [Papel]
+* Natã Batista 1072415016 - [Papel]
 
 ---
 *Status: Sprint 1 - Planejamento e Estruturação do Repositório.*
