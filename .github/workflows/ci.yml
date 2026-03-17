@@ -27,5 +27,4 @@ jobs:
 
     - name: Rodar testes automatizados com Pytest
       run: |
-        # Configuração do PYTHONPATH para o pytest encontrar a pasta src
-        PYTHONPATH=src pytest tests/ -v
+        PYTHONPATH=. pytest tests/ -v
