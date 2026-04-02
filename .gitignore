@@ -1,23 +1,32 @@
-.env
-.venv
-env/
+.venv/
 venv/
+env/
 ENV/
 
+.env
 .env.local
 .env.*
 
 __pycache__/
 *.py[cod]
 *$py.class
-
-*.sqlite3
-*.db
-
 .pytest_cache/
 .coverage
 htmlcov/
 
+*.sqlite3
+*.db
+postgres_data/
+data/
+logs/
+
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
 .vscode/
 .idea/
 *.swp
+.DS_Store
+*.json
