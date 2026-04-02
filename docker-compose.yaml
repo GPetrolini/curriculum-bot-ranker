@@ -1,0 +1,58 @@
+version: '3.8'
+
+x-airflow-common:
+  &airflow-common
+  image: apache/airflow:2.8.1
+  environment:
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db/airflow_db
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+  volumes:
+    - ./dags:/opt/airflow/dags
+    - ./data:/opt/airflow/data
+  depends_on:
+    - db
+
+services:
+  db:
+    image: postgres:15
+    container_name: cv_ranker_postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: cv_ranker_db
+      POSTGRES_MULTIPLE_DATABASES: cv_ranker_db,airflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cv_ranker_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: cv_ranker_airflow_web
+    command: webserver
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: cv_ranker_airflow_scheduler
+    command: scheduler
+
+volumes:
+  postgres_data:
