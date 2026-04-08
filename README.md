@@ -1,109 +1,136 @@
 # 📄 CV Ranker - AI Resume Analyzer
 
-Projeto desenvolvido para a UC HUB: Projeto Prático.
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
+![Apache Airflow](https://img.shields.io/badge/Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Google Cloud](https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)
+![Gemini AI](https://img.shields.io/badge/Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white)
 
-## 🎯 Escopo do Projeto
+> Ferramenta automatizada de leitura, estruturação e ranqueamento de currículos impulsionada por Inteligência Artificial.
 
-O CV Ranker é uma ferramenta automatizada de leitura, estruturação e ranqueamento de currículos.  
-O objetivo é acelerar o processo de triagem em processos seletivos, reduzindo o tempo de leitura humana e padronizando a avaliação dos candidatos.
 
-Usuário-Alvo: Profissionais de Recursos Humanos (RH), recrutadores de tecnologia e Tech Recruiters.
+> Este projeto está em fase ativa de desenvolvimento (Sprint atual). A infraestrutura base já está operante, mas as integrações de Inteligência Artificial e a interface final ainda estão sendo implementadas assim como o README.
+## Sobre o Projeto
+Projeto desenvolvido para a UC de **Gestão de Qualidade de Software** do curso de Análise e Desenvolvimento de Sistemas.
 
----
+**Instituição:** UNISUL - Florianópolis, SC.
 
-## ⚙️ Arquitetura Inicial
+**Professor:** Prof. Dr. Saulo Popov Zambiasi
 
-O sistema será composto por um pipeline simples:
 
-1. **Ingestão**
-   - Leitura de arquivos PDF e DOCX
-
-2. **Processamento (IA)**
-   - Extração de informações estruturadas (nome, skills, experiência)
-   - Geração de score de aderência à vaga
-
-3. **Armazenamento**
-   - Persistência dos dados estruturados para consultas
-
-4. **Ranking**
-   - Ordenação dos candidatos com base no score
+**Equipe de Desenvolvimento:**
+* **Gustavo Petrolini** (10724112917) - Engenharia de Dados / Banco de Dados
+*  **Gustavo Perino** (1072412639) - Backend
+*  **Leonardo Vivan** (1072416471) - Frontend
+*  **Tiago Machado** (1072410017) - Frontend 
+*  **Natã Batista** (1072415016) - Integração IA
 
 ---
 
-## 🔀 Gestão de Configuração
+## Escopo e Arquitetura
 
-Para garantir organização, colaboração segura e rastreabilidade das mudanças, o grupo adotou o modelo **GitHub Flow**.
+O **CV Ranker** visa acelerar o processo de triagem em processos seletivos, reduzindo o tempo de leitura humana e padronizando a avaliação dos candidatos de forma técnica.
 
-### 🌿 Branches
-
-- `main` → branch principal, sempre estável e com código validado
-- `feature/nome-da-tarefa` → desenvolvimento de novas funcionalidades
-- `fix/nome-do-bug` → correção de erros
-- `docs/nome-da-alteracao` → alterações de documentação
-- `chore/nome-da-tarefa` → tarefas de manutenção/configuração
+**Pipeline de Dados:**
+1. **Ingestão (Bronze):** Leitura de arquivos PDF/DOCX armazenados localmente e envio automatizado para o Data Lake (Google Cloud Storage).
+2. **Processamento (Silver):** Extração de texto via Python e estruturação semântica (nome, skills, experiência) utilizando a API do Google Gemini.
+3. **Armazenamento (Gold):** Persistência dos dados estruturados em banco relacional PostgreSQL para consumo da aplicação.
+4. **Aplicação:** Interface e API para RH ranquear e visualizar o *match* dos candidatos com a vaga.
 
 ---
 
-### 🔄 Fluxo de Trabalho
+## Módulos do Monorepo
 
-1. Criar uma branch a partir da `main`
-2. Desenvolver a funcionalidade nessa branch
-3. Fazer commits pequenos, frequentes e padronizados
-4. Abrir um Pull Request (PR)
-5. Outro integrante revisa e comenta
-6. Após aprovação, realizar o merge na `main`
+O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em seu respectivo escopo técnico:
 
----
+### 1. Engenharia de Dados (Gustavo Petrolini)
+* **Tecnologias:** Python, Apache Airflow, Docker, Google Cloud Storage, PostgreSQL.
+* **Status Atual:**
+  * Infraestrutura de orquestração local via Docker Compose (Webserver, Scheduler).
+  * Criação do Pipeline de Ingestão (DAGs) conectando dados brutos locais ao Data Lake no GCP.
+  * Injeção de credenciais de nuvem automatizada via variáveis de ambiente.
 
-## 📝 Política de Commits
+### 2. Backend & IA (Gustavo Perino)
+* **Tecnologias:** Python, FastAPI, Google Gemini API, SQLAlchemy.
+* **Status Atual:**
+  * [Descrever o que já foi configurado,].
 
-O grupo adotou o padrão **Conventional Commits**.
-
-### Tipos de commit
-
-- `feat:` nova funcionalidade
-- `fix:` correção de bug
-- `docs:` documentação
-- `test:` testes
-- `refactor:` refatoração sem alterar comportamento
-- `chore:` manutenção/configuração
-- `ci:` integração contínua
-
-### Exemplos
-
-- `feat: add PDF resume extraction`
-- `fix: handle invalid file type`
-- `docs: add configuration management section`
-- `test: add basic CI validation test`
-- `ci: configure GitHub Actions pipeline`
-- `chore: update gitignore`
+###  3. Frontend ([Nome])
+* **Tecnologias:** [React / HTML / CSS / etc]
+* **Status Atual:**
+  * [Descrever o progresso].
 
 ---
 
-## 🧹 Boas Práticas
+##  Estrutura do Repositório
 
-- Não realizar commits diretamente na `main`
-- Sempre utilizar Pull Requests
-- Realizar revisão de código antes do merge
-- Fazer commits pequenos e frequentes
-- Remover código morto e arquivos desnecessários
-- Manter o `.gitignore` atualizado
+```text
+📦 cv-ranker
+ ┣ 📂 .github/workflows/  # Pipelines de CI/CD automatizados (GitHub Actions)
+ ┣ 📂 alembic/            # Migrações e versionamento do banco de dados
+ ┣ 📂 config/             # Arquivos de configuração global do projeto
+ ┣ 📂 dags/               # Orquestração de pipelines de dados (Apache Airflow)
+ ┣ 📂 docs/               # Documentação complementar do projeto
+ ┣ 📂 etl/                # Scripts Python (Extração, Transformação e Carga)
+ ┣ 📂 src/                # Código-fonte da aplicação (Backend API e lógicas core)
+ ┣ 📂 terraform/          # Infraestrutura como Código (IaC) para o GCP
+ ┣ 📂 tests/              # Testes unitários e de integração
+ ┣ 📜 .env.example        # Template seguro de variáveis de ambiente
+ ┣ 📜 docker-compose.yaml # Orquestração dos containers (Airflow, Postgres, etc.)
+ ┣ 📜 init-db.sh          # Script de inicialização e seed do banco de dados
+ ┣ 📜 requirements.txt    # Dependências de pacotes do Python
+ ┗ 📜 README.md           # Documentação principal
+ ```
 
----
+# Como Executar Localmente
+Pré-requisitos: ```Docker``` e ```Docker Compose```.
 
-## ✅ Integração Contínua (CI/CD)
+## 1. Clone o repositório:
 
-O projeto utiliza **GitHub Actions** para:
+```
+git clone [https://github.com/SEU_USUARIO/cv-ranker.git](https://github.com/SEU_USUARIO/cv-ranker.git)
+```
+cd cv-ranker
+## 2. Configuração de Variáveis:
+Crie uma cópia do ```.env.example``` e renomeie para ```.env```.
+```
+cp .env.example .env
+Preencha o .env com as credenciais do GCP e demais chaves da aplicação.
+```
+## 3. Suba a Infraestrutura:
+```
+docker compose up -d
+```
+Airflow UI: ```http://localhost:8080```
 
-- Executar testes automaticamente
-- Validar alterações em Pull Requests
-- Garantir que o código esteja sempre estável
+# Guia de Contribuição e Versionamento
+Este repositório segue práticas rigorosas de CI/CD e revisão de código.
 
----
+### Fluxo de Trabalho (GitHub Flow)
+A branch ```main``` é protegida. O desenvolvimento de novas features ocorre em branches isoladas e é integrado via Pull Request (PR).
 
-## 🚀 Próximos Passos
+1. Crie uma branch a partir da ```main``` (```feature/nome-da-tarefa```).
 
-- Implementar extração de texto (PDF/DOCX)
-- Integrar com API de IA (Gemini)
-- Criar sistema de score de candidatos
-- Implementar armazenamento (banco de dados)
+2. Desenvolva pequenas entregas (Atomic Commits).
+
+3. Abra um PR apontando para a ```main```.
+
+4. É obrigatória a aprovação (Code Review) de pelo menos 1 membro da equipe antes do Merge.
+
+### Padrão de Commits (Conventional Commits)
+O histórico deve ser rastreável. Todo commit deve iniciar com um prefixo semântico:
+
+```feat:``` Nova funcionalidade (```feat: adiciona extrator de pdf```)
+
+```fix```: Correção de bug (```fix: resolve conflito de permissao de volume```)
+
+```docs```: Documentação (```docs: atualiza readme com arquitetura```)
+
+```refactor```: Alterações que não mudam comportamento (```refactor: reorganiza imports da etl```)
+
+```chore```: Manutenção e infraestrutura (```chore: atualiza imagem do airflow```)
+
+
+# Integração Contínua (CI/CD)
+O repositório utiliza GitHub Actions (ou similar configurado) para garantir a integridade da main, barrando merges que quebrem a aplicação ou não passem pelos testes.

@@ -44,8 +44,11 @@ services:
     depends_on:
       - db
     environment:
-      - LOAD_EXEMPLE=push
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db:5432/airflow_db
+      - PYTHONPATH=/opt/airflow
+      - AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT=google-cloud-platform://?extra__google_cloud_platform__project=${GCP_PROJECT_ID}&extra__google_cloud_platform__key_path=/opt/airflow/data/keys/gcp_key.json
     logging:
       options:
         max-size: "10mb"
@@ -55,9 +58,31 @@ services:
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
       - ./data:/opt/airflow/data
+      - ./etl:/opt/airflow/etl
     ports:
       - "8080:8080"
     command: >
       bash -c "airflow db upgrade && airflow webserver"
+
+  airflow-scheduler:
+    image: apache/airflow:2.8.1
+    container_name: cv_ranker_airflow_scheduler
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db:5432/airflow_db
+      - PYTHONPATH=/opt/airflow
+      - AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT=google-cloud-platform://?extra__google_cloud_platform__project=${GCP_PROJECT_ID}&extra__google_cloud_platform__key_path=/opt/airflow/data/keys/gcp_key.json
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./data:/opt/airflow/data
+      - ./etl:/opt/airflow/etl
+    command: bash -c "airflow scheduler"
+
 volumes:
   postgres_data:

@@ -1,11 +1,10 @@
 from __future__ import annotations
 import os
-import pandas as pd
 from airflow import DAG
 from airflow.decorators import task
-from airflow.providers.postgres.hooks.postgres import PostgresHook
 import pendulum
-from datetime import datetime
+
+from etl.postgres_to_csv import export_table_to_csv
 
 tabelas_origem = ["candidates", "jobs", "rankings"]
 pasta_staging = "/opt/airflow/data/staging"
@@ -15,42 +14,27 @@ with DAG(
     start_date=pendulum.datetime(2026, 4, 1, tz="America/Sao_Paulo"),
     schedule_interval="0 2 * * *",
     catchup=False,
-    tags=["cv_ranker", "etl", "gcp"],
+    tags=["cv_ranker", "etl", "gcp", "analytics"],
     doc_md="""
     ### CV Ranker Analytics Pipeline
     DAG responsável por extrair dados transacionais do Postgres local e preparar para o BigQuery (GCP).
-    
-    **Tasks:**
-    - `extracao_tabela_<tabela>`: Lê as tabelas do backend e salva em CSV no Staging local.
-    - `carrega_bigquery_<tabela>`: (A ser implementada) Envia os dados para o GCP.
     """,
 ) as dag:
 
     def criar_task_extracao(tabela: str):
         @task(task_id=f"extracao_tabela_{tabela}")
-        def extrai_tabela(nome_tabela: str, destino: str) -> str:
-            os.makedirs(destino, exist_ok=True)
-            pg_hook = PostgresHook(postgres_conn_id="cv_ranker_db_conn")
-            
-            query = f"SELECT * FROM {nome_tabela};"
-            df = pg_hook.get_pandas_df(query)
-            
-            arquivo_csv = os.path.join(destino, f"{nome_tabela}_{datetime.now().strftime('%Y%m%d')}.csv")
-            df.to_csv(arquivo_csv, index=False)
-            
-            print(f"Extração da tabela {nome_tabela} concluída com sucesso: {arquivo_csv}")
-            return arquivo_csv
+        def extrai_tabela_task(nome_tabela: str, destino: str) -> str:
+            return export_table_to_csv(nome_tabela, destino)
         
-        return extrai_tabela
+        return extrai_tabela_task
 
     def criar_task_load_gcp(tabela: str):
         @task(task_id=f"prepara_load_gcp_{tabela}")
-        def load_gcp(arquivo_csv: str):
+        def load_gcp_task(arquivo_csv: str):
             print(f"Preparando envio do arquivo {arquivo_csv} para o BigQuery...")
             # TODO:
             
-        return load_gcp
-
+        return load_gcp_task
     for tabela in tabelas_origem:
         pasta_destino = os.path.join(pasta_staging, "{{ ds }}")
         
