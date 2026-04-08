@@ -4,7 +4,6 @@ from airflow import DAG
 from airflow.decorators import task
 import pendulum
 
-# IMPORTANDO O OPERÁRIO (A NOSSA LÓGICA DE NEGÓCIO)
 from etl.postgres_to_csv import export_table_to_csv
 
 tabelas_origem = ["candidates", "jobs", "rankings"]
