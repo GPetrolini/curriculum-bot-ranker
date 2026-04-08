@@ -48,6 +48,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db:5432/airflow_db
       - PYTHONPATH=/opt/airflow
+      - AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT=google-cloud-platform://?extra__google_cloud_platform__project=${GCP_PROJECT_ID}&extra__google_cloud_platform__key_path=/opt/airflow/data/keys/gcp_key.json
     logging:
       options:
         max-size: "10mb"
@@ -74,6 +75,7 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db:5432/airflow_db
       - PYTHONPATH=/opt/airflow
+      - AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT=google-cloud-platform://?extra__google_cloud_platform__project=${GCP_PROJECT_ID}&extra__google_cloud_platform__key_path=/opt/airflow/data/keys/gcp_key.json
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
