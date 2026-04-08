@@ -16,7 +16,7 @@ Projeto desenvolvido para a UC de **Gestão de Qualidade de Software** do curso 
 
 **Instituição:** UNISUL - Florianópolis, SC.
 
-**Professor** Prof. Dr. Saulo Popov Zambiasi
+**Professor:** Prof. Dr. Saulo Popov Zambiasi
 
 
 **Equipe de Desenvolvimento:**
