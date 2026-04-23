@@ -2,11 +2,12 @@ version: '3.8'
 
 x-airflow-common:
   &airflow-common
-  image: apache/airflow:2.8.1
+  build: .
   environment:
-    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db/airflow_db
-    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    _PIP_ADDITIONAL_REQUIREMENTS: "pdfplumber==0.11.0"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./data:/opt/airflow/data
