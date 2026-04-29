@@ -20,7 +20,7 @@ STAGING_PATH = "/opt/airflow/data/staging"
 tabelas_origem = ["candidates", "jobs", "rankings", "curriculos_estruturados"]
 
 with DAG(
-    dag_id="cv_ranker_to_gcp_pipeline",
+    dag_id="02_carga_analytics_bq",
     start_date=pendulum.datetime(2026, 4, 1, tz="America/Sao_Paulo"),
     schedule_interval="0 2 * * *",
     catchup=False,
