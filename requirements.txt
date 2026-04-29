@@ -1,9 +1,10 @@
-pypdf==4.1.0
-python-docx==1.1.0
+pypdf
+python-docx
+pdfplumber
 
-google-generativeai==0.4.1
+google-generativeai
 openai
-python-dotenv==1.0.1
+python-dotenv
 
 fastapi==0.110.0
 uvicorn==0.29.0
@@ -12,9 +13,7 @@ python-multipart==0.0.9
 
 SQLAlchemy==2.0.29
 alembic==1.13.1
-psycopg2-binary==2.9.9
-
+psycopg2-binary
 apache-airflow-providers-postgres
 
-pytest==8.1.1
-pdfplumber==0.11.0
+pytest
