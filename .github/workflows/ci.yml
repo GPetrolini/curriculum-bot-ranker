@@ -24,6 +24,12 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install flake8 pytest  # Garantindo que as ferramentas de teste estão instaladas
+
+    - name: Validar qualidade do código (Linting com Flake8)
+      run: |
+        # Isso vai ler automaticamente o seu arquivo .flake8 e avaliar o código
+        flake8 .
 
     - name: Rodar testes automatizados com Pytest
       run: |
