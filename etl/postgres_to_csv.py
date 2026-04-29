@@ -1,5 +1,4 @@
 import os
-import pandas as pd
 from datetime import datetime
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
