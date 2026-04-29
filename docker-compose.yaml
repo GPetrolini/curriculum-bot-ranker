@@ -1,15 +1,21 @@
-version: '3.8'
-
 x-airflow-common:
   &airflow-common
-  image: apache/airflow:2.8.1
+  build:
+    context: .
+    dockerfile: Dockerfile
   environment:
-    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-    - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db/airflow_db
-    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://admin:adminpassword@db:5432/airflow_db
+    GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+    GEMINI_API_KEY: ${GEMINI_API_KEY}
   volumes:
     - ./dags:/opt/airflow/dags
     - ./data:/opt/airflow/data
+    - ./etl:/opt/airflow/etl
+    - ./logs:/opt/airflow/logs
+    - ./plugins:/opt/airflow/plugins
+    - ./.env:/opt/airflow/.env
   depends_on:
     - db
 
@@ -38,7 +44,7 @@ services:
       - "5050:80"
 
   airflow-webserver:
-    image: apache/airflow:2.8.1
+    <<: *airflow-common
     container_name: cv_ranker_airflow_web
     restart: always
     depends_on:
@@ -59,13 +65,16 @@ services:
       - ./plugins:/opt/airflow/plugins
       - ./data:/opt/airflow/data
       - ./etl:/opt/airflow/etl
+      - ./.env:/opt/airflow/.env
     ports:
       - "8080:8080"
     command: >
-      bash -c "airflow db upgrade && airflow webserver"
+      bash -c "airflow db init && 
+      airflow users create --username admin --firstname Gustavo --lastname Petrolini --role Admin --email admin@example.com --password ${AIRFLOW_PASSWORD} || true && 
+      airflow webserver"
 
   airflow-scheduler:
-    image: apache/airflow:2.8.1
+    <<: *airflow-common
     container_name: cv_ranker_airflow_scheduler
     restart: always
     depends_on:
@@ -75,13 +84,13 @@ services:
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://admin:adminpassword@db:5432/airflow_db
       - PYTHONPATH=/opt/airflow
-      - AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT=google-cloud-platform://?extra__google_cloud_platform__project=${GCP_PROJECT_ID}&extra__google_cloud_platform__key_path=/opt/airflow/data/keys/gcp_key.json
     volumes:
       - ./dags:/opt/airflow/dags
       - ./logs:/opt/airflow/logs
       - ./plugins:/opt/airflow/plugins
       - ./data:/opt/airflow/data
       - ./etl:/opt/airflow/etl
+      - ./.env:/opt/airflow/.env
     command: bash -c "airflow scheduler"
 
 volumes:
