@@ -6,13 +6,13 @@ google-generativeai
 openai
 python-dotenv
 
-fastapi==0.110.0
-uvicorn==0.29.0
-pydantic==2.6.4
-python-multipart==0.0.9
+fastapi
+uvicorn
+pydantic
+python-multipart
 
-SQLAlchemy==2.0.29
-alembic==1.13.1
+SQLAlchemy
+alembic
 psycopg2-binary
 apache-airflow-providers-postgres
 
