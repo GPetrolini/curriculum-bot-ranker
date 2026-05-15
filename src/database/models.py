@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 
 Base = declarative_base()
 
+
 class VacancyModel(Base):
     __tablename__ = "vacancies"
 
@@ -15,7 +16,9 @@ class VacancyModel(Base):
     department = Column(String(255), nullable=True)
     status = Column(String(50), nullable=True)
 
-    keywords = relationship("VacancyKeywordModel", back_populates="vacancy", cascade="all, delete-orphan")
+    keywords = relationship(
+        "VacancyKeywordModel", back_populates="vacancy", cascade="all, delete-orphan"
+    )
 
 
 class VacancyKeywordModel(Base):
@@ -24,7 +27,7 @@ class VacancyKeywordModel(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     vacancy_id = Column(UUID(as_uuid=True), ForeignKey("vacancies.id"), nullable=False)
     keyword = Column(String(255), nullable=False)
-    keyword_type = Column(String(50), nullable=True) # must_have ou nice_to_have
+    keyword_type = Column(String(50), nullable=True)
     keyword_weight = Column(Integer, nullable=True)
 
     vacancy = relationship("VacancyModel", back_populates="keywords")
@@ -57,14 +60,20 @@ class CandidateModel(Base):
     ai_weaknesses = Column(Text, nullable=True)
     ai_seniority = Column(String(50), nullable=True)
 
-    keywords = relationship("CandidateKeywordModel", back_populates="candidate", cascade="all, delete-orphan")
+    keywords = relationship(
+        "CandidateKeywordModel",
+        back_populates="candidate",
+        cascade="all, delete-orphan",
+    )
 
 
 class CandidateKeywordModel(Base):
     __tablename__ = "candidate_keywords"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    candidate_id = Column(UUID(as_uuid=True), ForeignKey("candidates.id"), nullable=False)
+    candidate_id = Column(
+        UUID(as_uuid=True), ForeignKey("candidates.id"), nullable=False
+    )
     keyword = Column(String(255), nullable=False)
     occurrences = Column(Integer, nullable=True)
     keyword_type = Column(String(50), nullable=True)
