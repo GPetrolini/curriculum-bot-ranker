@@ -59,8 +59,8 @@ def run_silver_to_gold(**context):
                 extract_entities_with_gemini(
                     bucket_name=BUCKET_NAME, source_blob_name=arquivo
                 )
-                print("Pausando 20 segundos para respeitar a API do Google...")
-                time.sleep(20)
+                print("Pausando 60 segundos para respeitar a API do Google...")
+                time.sleep(60)
 
             print(f"Inserindo {expected_json_name} no Banco de Dados...")
             load_gold_to_pg(bucket_name=BUCKET_NAME, source_blob_name=json_blob_name)
