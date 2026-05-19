@@ -13,7 +13,7 @@ def process_cv_bronze_to_silver(bucket_name, source_blob_name):
     temp_pdf_path = f"/tmp/{nome_arquivo}"
     temp_txt_path = temp_pdf_path.replace(".pdf", ".txt")
 
-    print(f"📥 Baixando {source_blob_name} do GCP...")
+    print(f"Baixando {source_blob_name} do GCP...")
     gcs_hook.download(
         bucket_name=bucket_name, object_name=source_blob_name, filename=temp_pdf_path
     )

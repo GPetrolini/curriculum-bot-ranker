@@ -17,7 +17,12 @@ PROJECT_ID = "cv-ranker-app"
 DATASET_ID = "cv_ranker_analytics"
 STAGING_PATH = "/opt/airflow/data/staging"
 
-tabelas_origem = ["candidates", "jobs", "rankings", "curriculos_estruturados"]
+tabelas_origem = tabelas_origem = [
+    "candidates",
+    "candidate_keywords",
+    "vacancies",
+    "vacancy_keywords",
+]
 
 with DAG(
     dag_id="02_carga_analytics_bq",
