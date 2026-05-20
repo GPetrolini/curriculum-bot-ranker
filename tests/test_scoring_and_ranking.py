@@ -1,3 +1,4 @@
+from src.services import ranking_engine, scoring_service
 import os
 import sys
 
@@ -5,8 +6,6 @@ import pytest
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, ROOT_DIR)
-
-from src.services import ranking_engine, scoring_service
 
 
 class TestScoringService:
