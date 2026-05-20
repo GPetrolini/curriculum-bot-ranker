@@ -1,16 +1,84 @@
+﻿import re
+from pathlib import Path
+from typing import Dict, Optional
+
 import fitz
 
 
-def extract_text_from_pdf(pdf_path):
-    text = ""
+class PDFExtractor:
 
-    try:
-        with fitz.open(pdf_path) as pdf:
-            for page in pdf:
-                text += page.get_text()
+    EMAIL_PATTERN = r"[\w\.-]+@[\w\.-]+\.[a-zA-Z]{2,6}"
+    PHONE_PATTERN = r"(?:\+\d{1,3}[\s-]?)?(?:\(\d{2,3}\)|\d{2,3})[\s-]?\d{4,5}[\s-]?\d{4}"
+    LINKEDIN_PATTERN = r"https?://(?:[\w]+\.)?linkedin\.com/[\w\-/]+"
+    GITHUB_PATTERN = r"https?://(?:www\.)?github\.com/[\w\-]+"
 
+    def extract(self, pdf_path: Path) -> Dict[str, Optional[str]]:
+        raw_text = ""
+        pages = 0
+
+        try:
+            with fitz.open(pdf_path) as pdf:
+                pages = pdf.page_count
+                for page in pdf:
+                    raw_text += page.get_text()
+        except Exception as exc:
+            raise RuntimeError(f"Falha ao ler PDF {pdf_path}: {exc}") from exc
+
+        cleaned_text = self.clean_text(raw_text)
+        contact_info = self._extract_contact_info(raw_text)
+
+        return {
+            "full_name": contact_info.get("full_name") or self._guess_full_name(raw_text) or pdf_path.stem,
+            "email": contact_info.get("email"),
+            "phone": contact_info.get("phone"),
+            "linkedin_url": contact_info.get("linkedin_url"),
+            "github_url": contact_info.get("github_url"),
+            "pdf_file_name": pdf_path.name,
+            "pdf_storage_url": str(pdf_path.resolve()),
+            "pdf_pages": pages,
+            "extracted_text": raw_text,
+            "cleaned_text": cleaned_text,
+            "total_words": len(cleaned_text.split()),
+            "total_characters": len(cleaned_text),
+        }
+
+    def clean_text(self, text: str) -> str:
+        text = text or ""
+        text = text.replace("\n", " ")
+        text = re.sub(r"[^\wÀ-ÿ@.\-/ ]", " ", text)
+        text = re.sub(r"\s+", " ", text).strip()
         return text
 
-    except Exception as e:
-        print(f"Erro ao ler PDF: {e}")
+    def _extract_contact_info(self, text: str) -> Dict[str, Optional[str]]:
+        email = self._search_pattern(self.EMAIL_PATTERN, text)
+        phone = self._search_pattern(self.PHONE_PATTERN, text)
+        linkedin_url = self._search_pattern(self.LINKEDIN_PATTERN, text)
+        github_url = self._search_pattern(self.GITHUB_PATTERN, text)
+        full_name = self._search_name(text)
+
+        return {
+            "full_name": full_name,
+            "email": email,
+            "phone": phone,
+            "linkedin_url": linkedin_url,
+            "github_url": github_url,
+        }
+
+    def _search_pattern(self, pattern: str, text: str) -> Optional[str]:
+        match = re.search(pattern, text, flags=re.IGNORECASE)
+        return match.group(0).strip() if match else None
+
+    def _search_name(self, text: str) -> Optional[str]:
+        match = re.search(r"(?:nome|name)\s*[:\-]?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,4})", text)
+        return match.group(1).strip() if match else None
+
+    def _guess_full_name(self, text: str) -> Optional[str]:
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        if not lines:
+            return None
+
+        first_line = lines[0]
+        if 2 <= len(first_line.split()) <= 5:
+            return first_line
+
         return None

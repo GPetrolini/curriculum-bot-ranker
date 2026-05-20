@@ -1,74 +1,74 @@
-import re
+﻿import re
+from typing import Dict, List, Optional, Union
+
+from database.models import VacancyKeywordModel
 
 
 class KeywordAnalyzer:
 
-    def __init__(self):
-        self.keywords = {
-            "must_have": [
-                ".net",
-                "c#",
-                "sql",
-                "api",
-                "rest",
-                "entity framework"
-            ],
-            "nice_to_have": [
-                "azure",
-                "docker",
-                "microservices",
-                "kubernetes",
-                "rabbitmq"
-            ]
-        }
+    FALLBACK_KEYWORDS = [
+        {"keyword": "python", "keyword_type": "must_have", "keyword_weight": 10},
+        {"keyword": "sql", "keyword_type": "must_have", "keyword_weight": 8},
+        {"keyword": "rest", "keyword_type": "must_have", "keyword_weight": 7},
+        {"keyword": "docker", "keyword_type": "nice_to_have", "keyword_weight": 5},
+        {"keyword": "kubernetes", "keyword_type": "nice_to_have", "keyword_weight": 5},
+    ]
 
-    def clean_text(self, text):
-
+    def clean_text(self, text: str) -> str:
+        text = text or ""
         text = text.lower()
-
         text = re.sub(r"\n", " ", text)
+        text = re.sub(r"[^a-z0-9à-ÿ@.\-/ ]", " ", text)
+        text = re.sub(r"\s+", " ", text).strip()
+        return text
 
-        text = re.sub(r"[^a-zA-Z0-9À-ÿ.# ]", "", text)
+    def analyze_vacancy_keywords(
+        self,
+        text: str,
+        vacancy_keywords: Optional[List[Union[VacancyKeywordModel, Dict]]] = None,
+    ) -> Dict:
+        text = self.clean_text(text)
+        source_keywords = vacancy_keywords or self.FALLBACK_KEYWORDS
 
-        text = re.sub(r"\s+", " ", text)
-
-        return text.strip()
-
-    def count_keywords(self, text):
-
-        result = {
-            "must_have": {},
-            "nice_to_have": {}
-        }
-
+        keyword_records = []
         must_have_score = 0
         nice_to_have_score = 0
 
-        # MUST HAVE
-        for keyword in self.keywords["must_have"]:
+        for item in source_keywords:
+            if hasattr(item, "keyword"):
+                keyword = getattr(item, "keyword").lower()
+                keyword_type = getattr(item, "keyword_type", "nice_to_have")
+                keyword_weight = getattr(item, "keyword_weight", 1)
+            else:
+                keyword = item["keyword"].lower()
+                keyword_type = item.get("keyword_type", "nice_to_have")
+                keyword_weight = item.get("keyword_weight", 1)
 
-            occurrences = text.count(keyword.lower())
+            occurrences = len(re.findall(re.escape(keyword), text))
+            keyword_score = int(occurrences * keyword_weight)
 
-            result["must_have"][keyword] = occurrences
+            if keyword_type == "must_have":
+                must_have_score += keyword_score
+            else:
+                nice_to_have_score += keyword_score
 
-            must_have_score += occurrences * 10
-
-        # NICE TO HAVE
-        for keyword in self.keywords["nice_to_have"]:
-
-            occurrences = text.count(keyword.lower())
-
-            result["nice_to_have"][keyword] = occurrences
-
-            nice_to_have_score += occurrences * 5
+            keyword_records.append(
+                {
+                    "keyword": keyword,
+                    "occurrences": occurrences,
+                    "keyword_type": keyword_type,
+                    "keyword_weight": keyword_weight,
+                    "keyword_score": keyword_score,
+                }
+            )
 
         final_score = must_have_score + nice_to_have_score
 
         return {
-            "keywords_found": result,
+            "keyword_records": keyword_records,
             "must_have_score": must_have_score,
             "nice_to_have_score": nice_to_have_score,
             "final_score": final_score,
             "total_words": len(text.split()),
-            "total_characters": len(text)
+            "total_characters": len(text),
         }
