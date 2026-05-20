@@ -104,6 +104,35 @@ docker compose up -d
 ```
 Airflow UI: ```http://localhost:8080```
 
+# Testes
+Este projeto usa `pytest` para testes automatizados e também inclui cenários no padrão BDD com `pytest-bdd`.
+
+## O que está coberto
+- Testes unitários em `tests/test_scoring_and_ranking.py`:
+  - valida o cálculo de score em `scoring_service.calculate_score`
+  - testa todos os intervalos de ranking em `RankingEngine.determine_ranking`
+  - verifica a aplicação de ranking em payloads de candidato com `RankingEngine.apply`
+- Testes BDD em `tests/features/scoring_and_ranking.feature` e `tests/test_scoring_and_ranking_bdd.py`:
+  - descrevem o comportamento esperado em cenários Gherkin
+  - confirmam o cálculo de score, a determinação de ranking e a aplicação do ranking no payload
+
+## Como executar
+Executar apenas os testes de score e ranking:
+```powershell
+.venv\Scripts\Activate.ps1
+pytest -q tests/test_scoring_and_ranking.py
+```
+
+Executar todos os testes da pasta `tests`:
+```powershell
+.venv\Scripts\Activate.ps1
+pytest -q tests
+```
+
+## Observações
+- A suíte atual já roda com `pytest` e inclui testes unitários e BDD para a lógica de score/ranking.
+- Se precisar de relatório de cobertura percentual, é possível adicionar `pytest-cov` ao projeto posteriormente.
+
 # Guia de Contribuição e Versionamento
 Este repositório segue práticas rigorosas de CI/CD e revisão de código.
 
