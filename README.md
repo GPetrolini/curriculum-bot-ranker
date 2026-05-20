@@ -40,6 +40,20 @@ O **CV Ranker** visa acelerar o processo de triagem em processos seletivos, redu
 
 ---
 
+## Algoritmo de Ranqueamento
+O processamento atual do projeto segue estas etapas:
+1. O PDF é extraído para texto através do módulo de extração.
+2. O texto é limpo e analisado pelo `KeywordAnalyzer` para identificar skills obrigatórias e desejáveis.
+3. O score final é calculado a partir dos pontos de `must_have` e `nice_to_have`.
+4. O `RankingEngine` converte o score em um nível de ranking:
+   - `80+` → `EXCELENTE`
+   - `50-79` → `BOM`
+   - `30-49` → `MEDIANO`
+   - `0-29` → `FRACO`
+5. Cada candidato é salvo no banco PostgreSQL e o script principal pode exibir no terminal o ranking ordenado com `nome`, `score` e `nível`.
+
+---
+
 ## Módulos do Monorepo
 
 O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em seu respectivo escopo técnico:
@@ -131,6 +145,8 @@ pytest -q tests
 
 ## Observações
 - A suíte atual já roda com `pytest` e inclui testes unitários e BDD para a lógica de score/ranking.
+- O foco de teste atual é a lógica de score e de determinação de ranking, não a extração de PDF ou a API inteira.
+- O projeto também roda o script principal em CLI para exibir o ranking no terminal, além de persistir candidatos no banco.
 - Se precisar de relatório de cobertura percentual, é possível adicionar `pytest-cov` ao projeto posteriormente.
 
 # Guia de Contribuição e Versionamento
