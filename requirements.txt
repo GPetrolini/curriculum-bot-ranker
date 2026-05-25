@@ -1,4 +1,4 @@
-pymupdf
+﻿pymupdf
 pypdf
 python-docx
 pdfplumber
@@ -18,3 +18,4 @@ psycopg2-binary
 apache-airflow-providers-postgres
 
 pytest
+pytest-bdd

@@ -1,26 +1,48 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from src.services.file_service import save_temp_file
-from src.services.extractor_service import extract_text
-from src.utils.validators import validate_file
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+
+from src.services.resume_service import analyze_existing_candidate, get_candidate_info
 
 router = APIRouter()
 
 
-@router.post("/upload")
-async def upload_resume(file: UploadFile = File(...)):
+class ResumeAnalyzeRequest(BaseModel):
+    candidate_id: Optional[str] = None
+    file_name: Optional[str] = None
+
+
+@router.post("/analyze")
+async def analyze_resume(request: ResumeAnalyzeRequest):
     try:
-        validate_file(file)
-
-        file_path = await save_temp_file(file)
-
-        text = extract_text(file_path)
+        analysis_result = analyze_existing_candidate(
+            candidate_id=request.candidate_id,
+            file_name=request.file_name,
+        )
 
         return {
-            "file_name": file.filename,
-            "file_type": file.filename.split(".")[-1],
-            "extracted_text_preview": text[:500],
-            "status": "success"
+            "status": "success",
+            "candidate_id": analysis_result["candidate_id"],
+            "name": analysis_result["name"],
+            "email": analysis_result["email"],
+            "phone": analysis_result["phone"],
+            "summary": analysis_result["summary"],
+            "skills": analysis_result["skills"],
+            "experience_years": analysis_result["experience_years"],
+            "final_score": analysis_result["final_score"],
+            "ranking_level": analysis_result["ranking_level"],
         }
+
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/info")
+async def get_resume_info(candidate_id: Optional[str] = None, file_name: Optional[str] = None):
+    try:
+        info = get_candidate_info(candidate_id=candidate_id, file_name=file_name)
+        return {"status": "success", **info}
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

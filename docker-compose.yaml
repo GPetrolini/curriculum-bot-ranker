@@ -43,6 +43,27 @@ services:
     ports:
       - "5050:80"
 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: cv_ranker_api
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - PORT=8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./src:/app/src
+      - ./.env:/app/.env
+    depends_on:
+      - db
+
   airflow-webserver:
     <<: *airflow-common
     container_name: cv_ranker_airflow_web

@@ -40,6 +40,20 @@ O **CV Ranker** visa acelerar o processo de triagem em processos seletivos, redu
 
 ---
 
+## Algoritmo de Ranqueamento
+O processamento atual do projeto segue estas etapas:
+1. O PDF é extraído para texto através do módulo de extração.
+2. O texto é limpo e analisado pelo `KeywordAnalyzer` para identificar skills obrigatórias e desejáveis.
+3. O score final é calculado a partir dos pontos de `must_have` e `nice_to_have`.
+4. O `RankingEngine` converte o score em um nível de ranking:
+   - `80+` → `EXCELENTE`
+   - `50-79` → `BOM`
+   - `30-49` → `MEDIANO`
+   - `0-29` → `FRACO`
+5. Cada candidato é salvo no banco PostgreSQL e o script principal pode exibir no terminal o ranking ordenado com `nome`, `score` e `nível`.
+
+---
+
 ## Módulos do Monorepo
 
 O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em seu respectivo escopo técnico:
@@ -52,9 +66,12 @@ O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em se
   * Injeção de credenciais de nuvem automatizada via variáveis de ambiente.
 
 ### 2. Backend & IA (Gustavo Perino)
-* **Tecnologias:** Python, FastAPI, Google Gemini API, SQLAlchemy.
+* **Tecnologias:** Python, FastAPI, OpenAI / Google Gemini, SQLAlchemy, Docker.
 * **Status Atual:**
-  * [Descrever o que já foi configurado,].
+  * API FastAPI implementada com rotas de análise e consulta de candidatos.
+  * Integração com OpenAI para gerar resumo de currículo, seniority e skills a partir do texto armazenado no banco.
+  * Serviço Docker dedicado `backend` disponível em `docker-compose.yaml`.
+  * Suporte a variáveis de ambiente via `.env` para `DATABASE_URL`, `OPENAI_API_KEY` e demais credenciais.
 
 ###  3. Frontend ([Nome])
 * **Tecnologias:** [React / HTML / CSS / etc]
@@ -88,21 +105,97 @@ Pré-requisitos: ```Docker``` e ```Docker Compose```.
 
 ## 1. Clone o repositório:
 
-```
-git clone [https://github.com/SEU_USUARIO/cv-ranker.git](https://github.com/SEU_USUARIO/cv-ranker.git)
-```
+```bash
+git clone https://github.com/SEU_USUARIO/cv-ranker.git
 cd cv-ranker
+```
+
 ## 2. Configuração de Variáveis:
-Crie uma cópia do ```.env.example``` e renomeie para ```.env```.
-```
+Crie uma cópia do `.env.example` e renomeie para `.env`.
+
+```bash
 cp .env.example .env
-Preencha o .env com as credenciais do GCP e demais chaves da aplicação.
 ```
+
+Preencha o `.env` com as credenciais do GCP e demais chaves da aplicação.
+
 ## 3. Suba a Infraestrutura:
-```
+
+```bash
 docker compose up -d
 ```
-Airflow UI: ```http://localhost:8080```
+
+Airflow UI: `http://localhost:8080`
+
+## 4. Backend FastAPI via Docker
+O backend FastAPI agora tem um container próprio. Ele expõe a API em `http://localhost:8001`.
+
+Para subir apenas o backend:
+
+```bash
+docker compose up -d backend
+```
+
+Para subir toda a stack (Postgres + backend + Airflow):
+
+```bash
+docker compose up -d
+```
+
+Para testar apenas o backend e reconstruir a imagem:
+
+```bash
+docker compose up --build backend
+```
+
+### Endpoints disponíveis
+* `POST http://localhost:8001/resume/analyze`
+  * Payload JSON:
+
+```json
+{
+  "candidate_id": "93ce286a-954a-4510-8e35-95689376e716"
+}
+```
+  * Executa análise de currículo usando o texto já armazenado no banco.
+* `GET http://localhost:8001/resume/info?candidate_id=<id>`
+  * Exemplo:
+
+```bash
+curl "http://localhost:8001/resume/info?candidate_id=93ce286a-954a-4510-8e35-95689376e716"
+```
+  * Retorna o resumo, seniority e strengths do candidato já calculados.
+
+# Testes
+Este projeto usa `pytest` para testes automatizados e também inclui cenários no padrão BDD com `pytest-bdd`.
+
+## O que está coberto
+- Testes unitários em `tests/test_scoring_and_ranking.py`:
+  - valida o cálculo de score em `scoring_service.calculate_score`
+  - testa todos os intervalos de ranking em `RankingEngine.determine_ranking`
+  - verifica a aplicação de ranking em payloads de candidato com `RankingEngine.apply`
+- Testes BDD em `tests/features/scoring_and_ranking.feature` e `tests/test_scoring_and_ranking_bdd.py`:
+  - descrevem o comportamento esperado em cenários Gherkin
+  - confirmam o cálculo de score, a determinação de ranking e a aplicação do ranking no payload
+
+## Como executar
+Executar apenas os testes de score e ranking:
+```powershell
+.venv\Scripts\Activate.ps1
+pytest -q tests/test_scoring_and_ranking.py
+```
+
+Executar todos os testes da pasta `tests`:
+```powershell
+.venv\Scripts\Activate.ps1
+pytest -q tests
+```
+
+## Observações
+- A suíte atual já roda com `pytest` e inclui testes unitários e BDD para a lógica de score/ranking.
+- O foco de teste atual é a lógica de score e de determinação de ranking, não a extração de PDF ou a API inteira.
+- O projeto também roda o script principal em CLI para exibir o ranking no terminal, além de persistir candidatos no banco.
+- Se precisar de relatório de cobertura percentual, é possível adicionar `pytest-cov` ao projeto posteriormente.
 
 # Guia de Contribuição e Versionamento
 Este repositório segue práticas rigorosas de CI/CD e revisão de código.
