@@ -1,11 +1,11 @@
-Feature: Candidate scoring and ranking
-  Validate the candidate score and ranking behavior based on required skills.
+Feature: Score e ranking de candidatos
+  Validar o comportamento de cálculo de score e ranking do candidato com base nas skills exigidas.
 
-  Scenario Outline: Calculate score based on matched required skills
-    Given a candidate has skills "<skills>"
-    And the job requires skills "<required_skills>"
-    When the score is calculated
-    Then the score should be <expected>
+  Scenario Outline: Calcular score com base nas skills correspondentes
+    Given o candidato tem skills "<skills>"
+    And o trabalho exige skills "<required_skills>"
+    When o score é calculado
+    Then o score deve ser <expected>
 
     Examples:
       | skills              | required_skills                    | expected |
@@ -13,10 +13,10 @@ Feature: Candidate scoring and ranking
       | python, sql         | python, aws                        | 50.0     |
       | python, sql, aws    | python, sql, aws, docker           | 75.0     |
 
-  Scenario Outline: Determine ranking from score
-    Given the candidate has a score of <final_score>
-    When ranking is determined
-    Then the ranking level should be "<expected_ranking>"
+  Scenario Outline: Determinar ranking a partir do score
+    Given o candidato tem um score de <final_score>
+    When o ranking é determinado
+    Then o nível de ranking deve ser "<expected_ranking>"
 
     Examples:
       | final_score | expected_ranking |
@@ -25,12 +25,12 @@ Feature: Candidate scoring and ranking
       | 30          | MEDIANO          |
       | 0           | FRACO            |
 
-  Scenario: Apply ranking to candidate payload
-    Given a candidate payload with final_score 72
-    When ranking is applied
-    Then the candidate payload ranking_level should be "BOM"
+  Scenario: Aplicar ranking ao payload do candidato
+    Given um payload de candidato com final_score 72
+    When o ranking é aplicado
+    Then o payload do candidato deve ter ranking_level "BOM"
 
-  Scenario: Apply default ranking when final_score is missing
-    Given a candidate payload without final_score
-    When ranking is applied
-    Then the candidate payload ranking_level should be "FRACO"
+  Scenario: Aplicar ranking padrão quando final_score estiver ausente
+    Given um payload de candidato sem final_score
+    When o ranking é aplicado
+    Then o payload do candidato deve ter ranking_level "FRACO"

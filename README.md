@@ -66,9 +66,12 @@ O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em se
   * Injeção de credenciais de nuvem automatizada via variáveis de ambiente.
 
 ### 2. Backend & IA (Gustavo Perino)
-* **Tecnologias:** Python, FastAPI, Google Gemini API, SQLAlchemy.
+* **Tecnologias:** Python, FastAPI, OpenAI / Google Gemini, SQLAlchemy, Docker.
 * **Status Atual:**
-  * [Descrever o que já foi configurado,].
+  * API FastAPI implementada com rotas de análise e consulta de candidatos.
+  * Integração com OpenAI para gerar resumo de currículo, seniority e skills a partir do texto armazenado no banco.
+  * Serviço Docker dedicado `backend` disponível em `docker-compose.yaml`.
+  * Suporte a variáveis de ambiente via `.env` para `DATABASE_URL`, `OPENAI_API_KEY` e demais credenciais.
 
 ###  3. Frontend ([Nome])
 * **Tecnologias:** [React / HTML / CSS / etc]
@@ -102,21 +105,66 @@ Pré-requisitos: ```Docker``` e ```Docker Compose```.
 
 ## 1. Clone o repositório:
 
-```
-git clone [https://github.com/SEU_USUARIO/cv-ranker.git](https://github.com/SEU_USUARIO/cv-ranker.git)
-```
+```bash
+git clone https://github.com/SEU_USUARIO/cv-ranker.git
 cd cv-ranker
+```
+
 ## 2. Configuração de Variáveis:
-Crie uma cópia do ```.env.example``` e renomeie para ```.env```.
-```
+Crie uma cópia do `.env.example` e renomeie para `.env`.
+
+```bash
 cp .env.example .env
-Preencha o .env com as credenciais do GCP e demais chaves da aplicação.
 ```
+
+Preencha o `.env` com as credenciais do GCP e demais chaves da aplicação.
+
 ## 3. Suba a Infraestrutura:
-```
+
+```bash
 docker compose up -d
 ```
-Airflow UI: ```http://localhost:8080```
+
+Airflow UI: `http://localhost:8080`
+
+## 4. Backend FastAPI via Docker
+O backend FastAPI agora tem um container próprio. Ele expõe a API em `http://localhost:8001`.
+
+Para subir apenas o backend:
+
+```bash
+docker compose up -d backend
+```
+
+Para subir toda a stack (Postgres + backend + Airflow):
+
+```bash
+docker compose up -d
+```
+
+Para testar apenas o backend e reconstruir a imagem:
+
+```bash
+docker compose up --build backend
+```
+
+### Endpoints disponíveis
+* `POST http://localhost:8001/resume/analyze`
+  * Payload JSON:
+
+```json
+{
+  "candidate_id": "93ce286a-954a-4510-8e35-95689376e716"
+}
+```
+  * Executa análise de currículo usando o texto já armazenado no banco.
+* `GET http://localhost:8001/resume/info?candidate_id=<id>`
+  * Exemplo:
+
+```bash
+curl "http://localhost:8001/resume/info?candidate_id=93ce286a-954a-4510-8e35-95689376e716"
+```
+  * Retorna o resumo, seniority e strengths do candidato já calculados.
 
 # Testes
 Este projeto usa `pytest` para testes automatizados e também inclui cenários no padrão BDD com `pytest-bdd`.

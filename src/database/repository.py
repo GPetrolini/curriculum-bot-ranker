@@ -61,6 +61,19 @@ class CandidateRepository:
         return db.query(CandidateModel).filter(CandidateModel.pdf_file_name == file_name).first()
 
     @staticmethod
+    def get_by_id(db: Session, candidate_id: str) -> Optional[CandidateModel]:
+        return db.query(CandidateModel).filter(CandidateModel.id == candidate_id).first()
+
+    @staticmethod
+    def update_candidate(db: Session, candidate: CandidateModel, updates: Dict) -> CandidateModel:
+        for key, value in updates.items():
+            setattr(candidate, key, value)
+
+        db.commit()
+        db.refresh(candidate)
+        return candidate
+
+    @staticmethod
     def create_candidate(
         db: Session,
         candidate_data: Dict,

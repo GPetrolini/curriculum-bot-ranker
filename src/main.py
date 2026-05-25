@@ -8,11 +8,19 @@ from config.settings import settings
 from database.connection import SessionLocal, engine
 from database.models import Base, CandidateModel, VacancyModel
 from database.repository import CandidateRepository, VacancyRepository
+from routes.resume_routes import router as resume_router
 from services.keyword_analyzer import KeywordAnalyzer
 from services.pdf_extractor import PDFExtractor
 from services.ranking_engine import RankingEngine
 
 app = FastAPI(title="CV Ranker API")
+app.include_router(resume_router, prefix="/resume", tags=["resume"])
+
+
+@app.on_event("startup")
+def startup_event() -> None:
+    Base.metadata.create_all(bind=engine)
+
 
 extractor = PDFExtractor()
 analyzer = KeywordAnalyzer()
@@ -104,11 +112,33 @@ def process_assets() -> dict:
                 candidate = process_pdf(pdf_path, vacancy, session)
                 processed_ids.append(str(candidate.id))
             except SQLAlchemyError as exc:
-                raise RuntimeError(f"Falha ao salvar candidato para {pdf_path.name}: {exc}") from exc
+                raise RuntimeError(
+                    f"Falha ao salvar candidato para {pdf_path.name}: {exc}"
+                ) from exc
             except Exception as exc:
                 print(f"Falha no processamento de {pdf_path.name}: {exc}")
 
     return {"processed": len(processed_ids), "candidate_ids": processed_ids}
+
+
+def print_best_candidates(vacancy_title: str) -> None:
+    with SessionLocal() as session:
+        candidates = (
+            session.query(CandidateModel)
+            .filter(CandidateModel.vacancy_applied == vacancy_title)
+            .order_by(CandidateModel.final_score.desc())
+            .all()
+        )
+
+        if not candidates:
+            print("Nenhum candidato processado para exibir.")
+            return
+
+        print("\n=== Ranking de currículos ===")
+        for candidate in candidates:
+            print(
+                f"{candidate.full_name} - Score: {candidate.final_score} - Nível: {candidate.ranking_level}"
+            )
 
 
 @app.get("/")
@@ -124,3 +154,7 @@ def run_processing() -> dict:
 if __name__ == "__main__":
     result = process_assets()
     print(result)
+
+    with SessionLocal() as session:
+        vacancy = get_or_create_vacancy(session)
+        print_best_candidates(vacancy.title)
