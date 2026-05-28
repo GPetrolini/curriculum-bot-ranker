@@ -158,6 +158,7 @@ async function fetchCandidates() {
     document.getElementById("totalCount").textContent =
       candidates.length.toLocaleString("pt-BR");
 
+    updateStats();
     go();
   } catch (err) {
     console.error("Erro ao buscar candidatos:", err);
@@ -181,11 +182,31 @@ function setLoading(state) {
   }
 }
 
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+function updateStats() {
+  if (!candidates.length) return;
+
+  // % com ranking ÓTIMO
+  const otimo = candidates.filter(c => c.ranking_level === "ÓTIMO").length;
+  const pct   = Math.round((otimo / candidates.length) * 100);
+  document.getElementById("pctOtimo").textContent = `${pct}%`;
+
+  // candidato com maior nota
+  const top = candidates.reduce((a, b) => a.final_score > b.final_score ? a : b);
+  document.getElementById("topScore").textContent = formatScore(top.final_score);
+  document.getElementById("topName").textContent  = top.name;
+}
+
 // ── Render List ───────────────────────────────────────────────────────────────
 
 function renderRow(candidate, index) {
   const av      = getAvatarColor(candidate.name);
   const ranking = getRanking(candidate.ranking_level);
+
+  const skillsHtml = candidate.skills
+    .map(s => `<span class="row-skill">${s}</span>`)
+    .join("");
 
   return `
     <div class="row" onclick="openModal('${candidate.candidate_id}')">
@@ -195,6 +216,7 @@ function renderRow(candidate, index) {
       <div class="info">
         <div class="cname">${candidate.name}</div>
         <div class="crole">${candidate.email}</div>
+        <div class="row-skills">${skillsHtml}</div>
       </div>
       <div class="row-score">
         <div class="score-pill ${ranking.badgeClass}">
