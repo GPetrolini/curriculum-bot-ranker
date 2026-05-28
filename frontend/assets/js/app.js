@@ -6,7 +6,7 @@ const API_URL = "https://sua-api.com/candidates"; // 🔧 Troque pela URL real d
 
 let candidates = []; // preenchido pelo fetch
 
-// ── Mock (remover quando o backend estiver conectado) ─────────────────────────
+// ── Mock (remover quando o backend estiverr conectado) ─────────────────────────
 
 const MOCK_DATA = [
   {
