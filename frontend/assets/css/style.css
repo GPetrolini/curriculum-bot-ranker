@@ -475,7 +475,7 @@ html, body {
   display: flex;
 }
 
-/* ── Modal box ───────────────────────────────────────────────────────────────*/
+/* ── Modal boxx ───────────────────────────────────────────────────────────────*/
 .modal {
   background: var(--surface);
   border: 1px solid var(--border2);
