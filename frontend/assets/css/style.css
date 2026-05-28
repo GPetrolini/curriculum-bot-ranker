@@ -157,16 +157,23 @@ html, body {
   margin-top: 4px;
 }
 
+/* ── Stats Row ── */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
 /* ── Stat Card ── */
 .stat-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 1.1rem 1.4rem;
-  margin-bottom: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
 .stat-icon {
@@ -185,6 +192,12 @@ html, body {
   color: var(--accent);
 }
 
+.stat-icon--green { background: var(--green-bg); }
+.stat-icon--green i { color: var(--green-text); }
+
+.stat-icon--amber { background: var(--amber-bg); }
+.stat-icon--amber i { color: var(--amber-text); }
+
 .stat-sep {
   width: 1px;
   height: 36px;
@@ -194,7 +207,7 @@ html, body {
 
 .stat-label {
   font-size: 10px;
-  color: var(--text-3);
+  color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   font-family: var(--mono);
@@ -203,10 +216,21 @@ html, body {
 .stat-value {
   font-size: 28px;
   font-weight: 500;
-  color: var(--text);
+  color: #ffffff;
   line-height: 1.1;
   margin-top: 2px;
   letter-spacing: -0.03em;
+}
+
+.stat-sub {
+  font-size: 11px;
+  color: var(--text-3);
+  font-family: var(--mono);
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
 }
 
 /* ── Controls ── */
@@ -302,7 +326,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 8px;
+  padding: 12px 8px;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: background 0.12s;
@@ -341,6 +365,24 @@ html, body {
   font-size: 11px;
   color: var(--text-2);
   margin-top: 1px;
+}
+
+.row-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.row-skill {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(124, 106, 247, 0.2);
+  border-radius: 20px;
+  font-size: 10px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  white-space: nowrap;
 }
 
 /* ── Score Badges ── */
