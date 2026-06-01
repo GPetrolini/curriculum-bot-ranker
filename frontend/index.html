@@ -20,29 +20,47 @@
         recruta.ai
       </div>
       <nav class="nav">
-        <div class="nav-item active"><i class="ti ti-users"></i> Candidatos</div>
-        <div class="nav-item"><i class="ti ti-chart-bar"></i> Relatórios</div>
-        <div class="nav-item"><i class="ti ti-bell"></i> Notificações</div>
-        <div class="nav-item"><i class="ti ti-settings"></i> Config.</div>
+        <div class="nav-item active" id="nav-candidatos" onclick="showPage('candidatos')">
+          <i class="ti ti-users"></i> Candidatos
+        </div>
+        <div class="nav-item" id="nav-selecionados" onclick="showPage('selecionados')">
+          <i class="ti ti-clipboard-check"></i> Selecionados
+        </div>
       </nav>
       <div class="sidebar-footer">v1.0.0</div>
     </aside>
 
-    <!-- Main -->
-    <main class="main">
+    <!-- ── Página: Candidatos ── -->
+    <main class="main" id="page-candidatos">
       <div class="page-header">
         <h1 class="page-title">Painel de candidatos</h1>
         <p class="page-sub">Todos os currículos enviados para o bot.</p>
       </div>
 
-      <!-- Stat card -->
-      <div class="stat-card">
-        <div class="stat-icon"><i class="ti ti-users"></i></div>
-        <div>
-          <div class="stat-label">Total de candidatos</div>
-          <div class="stat-value" id="totalCount">—</div>
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="ti ti-users"></i></div>
+          <div>
+            <div class="stat-label">Total de candidatos</div>
+            <div class="stat-value" id="totalCount">—</div>
+          </div>
         </div>
-        <div class="stat-sep"></div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--green"><i class="ti ti-rosette-discount-check"></i></div>
+          <div>
+            <div class="stat-label">Classificados como ótimo</div>
+            <div class="stat-value" id="pctOtimo">—</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon stat-icon--amber"><i class="ti ti-trophy"></i></div>
+          <div>
+            <div class="stat-label">Maior nota</div>
+            <div class="stat-value" id="topScore">—</div>
+            <div class="stat-sub" id="topName">—</div>
+          </div>
+        </div>
       </div>
 
       <!-- Controls -->
@@ -69,6 +87,46 @@
 
       <!-- Candidate list -->
       <div id="list"></div>
+    </main>
+
+    <!-- ── Página: Selecionados ── -->
+    <main class="main hidden" id="page-selecionados">
+      <div class="page-header">
+        <h1 class="page-title">Selecionados</h1>
+        <p class="page-sub">Candidatos avançados no processo seletivo.</p>
+      </div>
+
+      <div class="selected-grid">
+
+        <!-- Lista: Entrevistas -->
+        <div class="selected-col">
+          <div class="selected-col-header">
+            <div class="selected-col-title">
+              <i class="ti ti-calendar-event"></i>
+              Entrevistas
+            </div>
+            <span class="selected-count" id="count-entrevista">0</span>
+          </div>
+          <div class="selected-list" id="list-entrevista">
+            <div class="empty-col">Nenhum candidato na fila de entrevistas.</div>
+          </div>
+        </div>
+
+        <!-- Lista: Contratados -->
+        <div class="selected-col">
+          <div class="selected-col-header">
+            <div class="selected-col-title">
+              <i class="ti ti-user-check"></i>
+              Contratados
+            </div>
+            <span class="selected-count selected-count--green" id="count-contratado">0</span>
+          </div>
+          <div class="selected-list" id="list-contratado">
+            <div class="empty-col">Nenhum candidato contratado ainda.</div>
+          </div>
+        </div>
+
+      </div>
     </main>
 
   </div>
