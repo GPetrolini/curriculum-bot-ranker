@@ -4,9 +4,13 @@ const API_URL = "https://sua-api.com/candidates"; // 🔧 Troque pela URL real d
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
-let candidates = []; // preenchido pelo fetch
+let candidates = [];
 
-// ── Mock (remover quando o backend estiverr conectado) ─────────────────────────
+// Status possíveis: null | "entrevista" | "contratado"
+const candidateStatus = JSON.parse(localStorage.getItem("candidateStatus") || "{}");
+ // { candidate_id: "entrevista" | "contratado" }
+
+// ── Mock (remover quando o backend estiver conectado) ─────────────────────────
 
 const MOCK_DATA = [
   {
@@ -83,23 +87,19 @@ const MOCK_DATA = [
   },
 ];
 
-// ── Avatar Colors — vinculadas ao nome, não à posição ────────────────────────
+// ── Avatar Colors ─────────────────────────────────────────────────────────────
 
 const avatarColors = [
-  { bg: "#1e1d3a", color: "#a89ff8" }, // lilás
-  { bg: "#0d2a2a", color: "#5dcaa5" }, // verde-água
-  { bg: "#2a1a1a", color: "#f0997b" }, // coral
-  { bg: "#1a2014", color: "#97c459" }, // verde
-  { bg: "#2a1a28", color: "#ed93b1" }, // rosa
-  { bg: "#1a1e2e", color: "#6ba3f5" }, // azul
-  { bg: "#241a10", color: "#e0a060" }, // âmbar
-  { bg: "#0f1e24", color: "#4ec9c9" }, // ciano
+  { bg: "#1e1d3a", color: "#a89ff8" },
+  { bg: "#0d2a2a", color: "#5dcaa5" },
+  { bg: "#2a1a1a", color: "#f0997b" },
+  { bg: "#1a2014", color: "#97c459" },
+  { bg: "#2a1a28", color: "#ed93b1" },
+  { bg: "#1a1e2e", color: "#6ba3f5" },
+  { bg: "#241a10", color: "#e0a060" },
+  { bg: "#0f1e24", color: "#4ec9c9" },
 ];
 
-/**
- * Gera um índice de cor determinístico a partir do nome.
- * O mesmo nome sempre retorna a mesma cor, independente da posição na lista.
- */
 function nameToColorIndex(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -115,10 +115,10 @@ function getAvatarColor(name) {
 // ── Ranking Config ────────────────────────────────────────────────────────────
 
 const RANKING_MAP = {
-  "ÓTIMO":   { badgeClass: "badge-high",   label: "Ótimo"   },
-  "BOM":     { badgeClass: "badge-mid",    label: "Bom"     },
-  "REGULAR": { badgeClass: "badge-low",    label: "Regular" },
-  "FRACO":   { badgeClass: "badge-weak",   label: "Fraco"   },
+  "ÓTIMO":   { badgeClass: "badge-high", label: "Ótimo"   },
+  "BOM":     { badgeClass: "badge-mid",  label: "Bom"     },
+  "REGULAR": { badgeClass: "badge-low",  label: "Regular" },
+  "FRACO":   { badgeClass: "badge-weak", label: "Fraco"   },
 };
 
 function getRanking(level) {
@@ -128,16 +128,22 @@ function getRanking(level) {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getInitials(name) {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map(word => word[0])
-    .join("")
-    .toUpperCase();
+  return name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
 }
 
 function formatScore(score) {
   return Number(score).toFixed(1);
+}
+
+// ── Navegação entre páginas ───────────────────────────────────────────────────
+
+function showPage(page) {
+  document.getElementById("page-candidatos").classList.toggle("hidden", page !== "candidatos");
+  document.getElementById("page-selecionados").classList.toggle("hidden", page !== "selecionados");
+  document.getElementById("nav-candidatos").classList.toggle("active", page === "candidatos");
+  document.getElementById("nav-selecionados").classList.toggle("active", page === "selecionados");
+
+  if (page === "selecionados") renderSelected();
 }
 
 // ── Fetch ─────────────────────────────────────────────────────────────────────
@@ -152,7 +158,7 @@ async function fetchCandidates() {
     // candidates = Array.isArray(data) ? data : [data];
 
     // Mock (remover depois):
-    await new Promise(r => setTimeout(r, 600)); // simula latência
+    await new Promise(r => setTimeout(r, 600));
     candidates = MOCK_DATA;
 
     document.getElementById("totalCount").textContent =
@@ -187,26 +193,38 @@ function setLoading(state) {
 function updateStats() {
   if (!candidates.length) return;
 
-  // % com ranking ÓTIMO
   const otimo = candidates.filter(c => c.ranking_level === "ÓTIMO").length;
   const pct   = Math.round((otimo / candidates.length) * 100);
   document.getElementById("pctOtimo").textContent = `${pct}%`;
 
-  // candidato com maior nota
   const top = candidates.reduce((a, b) => a.final_score > b.final_score ? a : b);
   document.getElementById("topScore").textContent = formatScore(top.final_score);
   document.getElementById("topName").textContent  = top.name;
 }
 
-// ── Render List ───────────────────────────────────────────────────────────────
+// ── Render — Lista de candidatos ──────────────────────────────────────────────
 
-function renderRow(candidate, index) {
+function renderRow(candidate) {
   const av      = getAvatarColor(candidate.name);
   const ranking = getRanking(candidate.ranking_level);
+  const status  = candidateStatus[candidate.candidate_id];
 
   const skillsHtml = candidate.skills
     .map(s => `<span class="row-skill">${s}</span>`)
     .join("");
+
+  // Botão de entrevista: desativado se já for contratado
+  const btnEntrevista = status === "entrevista"
+    ? `<button class="action-btn action-btn--active" onclick="removeStatus('${candidate.candidate_id}', event)">
+         <i class="ti ti-calendar-check"></i> Na entrevista
+       </button>`
+    : status === "contratado"
+    ? `<button class="action-btn action-btn--disabled" disabled>
+         <i class="ti ti-calendar-event"></i> Entrevista
+       </button>`
+    : `<button class="action-btn" onclick="setStatus('${candidate.candidate_id}', 'entrevista', event)">
+         <i class="ti ti-calendar-event"></i> Entrevista
+       </button>`;
 
   return `
     <div class="row" onclick="openModal('${candidate.candidate_id}')">
@@ -217,6 +235,9 @@ function renderRow(candidate, index) {
         <div class="cname">${candidate.name}</div>
         <div class="crole">${candidate.email}</div>
         <div class="row-skills">${skillsHtml}</div>
+      </div>
+      <div class="row-actions">
+        ${btnEntrevista}
       </div>
       <div class="row-score">
         <div class="score-pill ${ranking.badgeClass}">
@@ -231,13 +252,103 @@ function renderRow(candidate, index) {
 
 function render(list) {
   const el = document.getElementById("list");
-
   if (list.length === 0) {
     el.innerHTML = '<div class="empty">Nenhum candidato encontrado.</div>';
     return;
   }
+  el.innerHTML = list.map(c => renderRow(c)).join("");
+}
 
-  el.innerHTML = list.map((c, i) => renderRow(c, i)).join("");
+// ── Render — Página de Selecionados ──────────────────────────────────────────
+
+function renderSelected() {
+  const entrevista = candidates.filter(c => candidateStatus[c.candidate_id] === "entrevista");
+  const contratado = candidates.filter(c => candidateStatus[c.candidate_id] === "contratado");
+
+  document.getElementById("count-entrevista").textContent = entrevista.length;
+  document.getElementById("count-contratado").textContent = contratado.length;
+
+  renderSelectedList("list-entrevista", entrevista, "entrevista");
+  renderSelectedList("list-contratado", contratado, "contratado");
+}
+
+function renderSelectedList(elId, list, type) {
+  const el = document.getElementById(elId);
+
+  if (list.length === 0) {
+    el.innerHTML = type === "entrevista"
+      ? '<div class="empty-col">Nenhum candidato na fila de entrevistas.</div>'
+      : '<div class="empty-col">Nenhum candidato contratado ainda.</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(c => {
+    const av      = getAvatarColor(c.name);
+    const ranking = getRanking(c.ranking_level);
+
+    const actionBtn = type === "entrevista"
+      ? `<button class="action-btn action-btn--green" onclick="setStatus('${c.candidate_id}', 'contratado', event)">
+           <i class="ti ti-user-check"></i> Contratar
+         </button>
+         <button class="action-btn action-btn--remove" onclick="removeStatus('${c.candidate_id}', event)">
+           <i class="ti ti-x"></i>
+         </button>`
+      : `<button class="action-btn action-btn--remove" onclick="removeStatus('${c.candidate_id}', event)">
+           <i class="ti ti-x"></i> Remover
+         </button>`;
+
+    return `
+      <div class="selected-card">
+        <div class="av" style="background:${av.bg}; color:${av.color}">
+          ${getInitials(c.name)}
+        </div>
+        <div class="info">
+          <div class="cname">${c.name}</div>
+          <div class="crole">${c.email}</div>
+          <div class="row-skills">
+            ${c.skills.map(s => `<span class="row-skill">${s}</span>`).join("")}
+          </div>
+        </div>
+        <div class="selected-card-right">
+          <div class="score-pill ${ranking.badgeClass}">
+            <span class="score-number">${formatScore(c.final_score)}</span>
+            <span class="score-sep">/100</span>
+          </div>
+          <div class="selected-card-actions">${actionBtn}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ── Status dos candidatos ─────────────────────────────────────────────────────
+
+function setStatus(candidateId, status, event) {
+  event.stopPropagation(); // não abre o modal
+  candidateStatus[candidateId] = status;
+  go();
+  renderSelected();
+  function setStatus(candidateId, status, event) {
+  event.stopPropagation();
+  candidateStatus[candidateId] = status;
+  localStorage.setItem("candidateStatus", JSON.stringify(candidateStatus)); // ← adiciona essa
+  go();
+  renderSelected();
+}
+}
+
+function removeStatus(candidateId, event) {
+  event.stopPropagation();
+  delete candidateStatus[candidateId];
+  go();
+  renderSelected();
+  function removeStatus(candidateId, event) {
+  event.stopPropagation();
+  delete candidateStatus[candidateId];
+  localStorage.setItem("candidateStatus", JSON.stringify(candidateStatus)); // ← adiciona essa
+  go();
+  renderSelected();
+}
 }
 
 // ── Filter & Sort ─────────────────────────────────────────────────────────────
@@ -280,8 +391,8 @@ function openModal(candidateId) {
   document.getElementById("modal-id").textContent      = c.candidate_id;
 
   const rankEl = document.getElementById("modal-ranking");
-  rankEl.textContent  = ranking.label;
-  rankEl.className    = `modal-badge ${ranking.badgeClass}`;
+  rankEl.textContent = ranking.label;
+  rankEl.className   = `modal-badge ${ranking.badgeClass}`;
 
   document.getElementById("modal-skills").innerHTML = c.skills
     .map(s => `<span class="skill-tag">${s}</span>`)
@@ -294,12 +405,10 @@ function closeModal() {
   document.getElementById("modal-overlay").classList.remove("open");
 }
 
-// fechar ao clicar fora
 document.addEventListener("click", e => {
   if (e.target.id === "modal-overlay") closeModal();
 });
 
-// fechar com ESC
 document.addEventListener("keydown", e => {
   if (e.key === "Escape") closeModal();
 });

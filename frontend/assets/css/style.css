@@ -475,7 +475,7 @@ html, body {
   display: flex;
 }
 
-/* ── Modal boxx ───────────────────────────────────────────────────────────────*/
+/* ── Modal box ───────────────────────────────────────────────────────────────*/
 .modal {
   background: var(--surface);
   border: 1px solid var(--border2);
@@ -664,3 +664,159 @@ html, body {
 
 /* remove o estilo antigo de row-meta que não é mais usado */
 .row-meta { display: none; }
+
+/* ── Navegação oculta ────────────────────────────────────────────────────────*/
+.hidden { display: none !important; }
+
+/* ── Botões de ação na linha ─────────────────────────────────────────────────*/
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-family: var(--mono);
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text-2);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.action-btn--active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.action-btn--green {
+  background: var(--green-bg);
+  border-color: var(--green-bd);
+  color: var(--green-text);
+}
+
+.action-btn--green:hover {
+  filter: brightness(1.2);
+}
+
+.action-btn--remove {
+  background: #1e1010;
+  border-color: #5c2020;
+  color: #e07070;
+  padding: 5px 8px;
+}
+
+.action-btn--remove:hover {
+  filter: brightness(1.2);
+}
+
+.action-btn--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ── Página Selecionados ─────────────────────────────────────────────────────*/
+.selected-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.selected-col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.selected-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.selected-col-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.selected-col-title i { font-size: 16px; color: var(--accent); }
+
+.selected-count {
+  font-size: 11px;
+  font-family: var(--mono);
+  background: var(--accent-dim);
+  color: var(--accent);
+  border: 1px solid rgba(124,106,247,0.25);
+  border-radius: 20px;
+  padding: 2px 9px;
+}
+
+.selected-count--green {
+  background: var(--green-bg);
+  color: var(--green-text);
+  border-color: var(--green-bd);
+}
+
+.selected-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 120px;
+}
+
+.empty-col {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* ── Card na página de selecionados ──────────────────────────────────────────*/
+.selected-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  transition: background 0.12s;
+}
+
+.selected-card:hover { background: #1e1e28; }
+
+.selected-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.selected-card-actions {
+  display: flex;
+  gap: 5px;
+}
