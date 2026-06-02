@@ -79,6 +79,17 @@
         </div>
       </div>
 
+      <!-- Filtro por vaga (colapsável) -->
+      <div class="vaga-toggle-wrap">
+        <button class="vaga-toggle-btn" id="vagaToggleBtn" onclick="toggleVagas()">
+          <i class="ti ti-filter"></i>
+          Filtrar por vaga
+          <span class="vaga-active-label" id="vagaActiveLabel"></span>
+          <i class="ti ti-chevron-down vaga-chevron" id="vagaChevron"></i>
+        </button>
+        <div class="vaga-filters vaga-filters--hidden" id="vagaFilters"></div>
+      </div>
+
       <!-- List header -->
       <div class="list-header">
         <span class="lh-name">Candidato</span>
@@ -184,6 +195,19 @@
           <div class="skills-wrap" id="modal-skills"></div>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de confirmação -->
+  <div id="confirm-overlay">
+    <div class="confirm-box">
+      <div class="confirm-icon" id="confirm-icon"></div>
+      <div class="confirm-title" id="confirm-title"></div>
+      <div class="confirm-msg" id="confirm-msg"></div>
+      <div class="confirm-actions">
+        <button class="confirm-btn confirm-btn--cancel" onclick="closeConfirm()">Cancelar</button>
+        <button class="confirm-btn confirm-btn--ok" id="confirm-ok">Confirmar</button>
       </div>
     </div>
   </div>
