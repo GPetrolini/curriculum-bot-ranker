@@ -1,6 +1,6 @@
 # recruta.ai — Frontend
 
-Interface web do painel de candidatos. Exibe e filtra os currículos enviados ao bot.
+Interface web do painel de candidatos. Exibe, filtra e gerencia os currículos enviados ao bot.
 
 ---
 
@@ -13,9 +13,34 @@ frontend/
 │   ├── css/
 │   │   └── style.css       # Todos os estilos e design tokens
 │   └── js/
-│       └── app.js          # Lógica, fetch, render e filtros
+│       └── app.js          # Lógica, fetch, render, filtros e estado
 └── README.md
 ```
+
+---
+
+## Funcionalidades
+
+### Painel de Candidatos
+- Cards de estatísticas: total de candidatos, % classificados como Ótimo e candidato com maior nota
+- Listagem com nome, e-mail, skills, score e ranking de cada candidato
+- Busca em tempo real por nome, e-mail ou skill
+- Ordenação por score (crescente ou decrescente) ou por nome
+- Filtro por vaga com 37 áreas do mercado — colapsável para não poluir a tela
+- Modal de detalhes com todas as informações do candidato ao clicar na linha
+
+### Aba Selecionados
+- Lista de candidatos chamados para entrevista
+- Lista de candidatos contratados
+- Botão "Entrevista" em cada linha da listagem principal
+- Ação de contratar move o candidato da fila de entrevistas para contratados
+- Botão de remover em ambas as listas
+- Status persistido no `localStorage` — mantém os dados mesmo ao fechar o navegador
+
+### Confirmações
+- Dialog de confirmação ao marcar entrevista, contratar ou remover candidato
+- Cores diferentes por tipo de ação: roxo (entrevista), verde (contratar), vermelho (remover)
+- Fecha com ESC ou clicando fora
 
 ---
 
@@ -74,6 +99,29 @@ candidates = Array.isArray(data) ? data : [data];
 | `BOM`     | Bom      | Âmbar    |
 | `REGULAR` | Regular  | Lilás    |
 | `FRACO`   | Fraco    | Vermelho |
+
+---
+
+## Filtro por vaga
+
+O array `VAGAS` no topo do `app.js` contém 37 áreas do mercado com suas keywords. Para adicionar uma vaga nova, basta inserir uma linha:
+
+```js
+{ label: "Nome da Vaga", keywords: ["keyword1", "keyword2", "keyword3"] },
+```
+
+O filtro cruza as keywords com o campo `skills` e o `summary` do candidato. Quanto mais padronizadas forem as skills extraídas pelo bot, mais preciso será o filtro.
+
+---
+
+## Estado local (localStorage)
+
+O status de cada candidato (entrevista ou contratado) é salvo no `localStorage` do navegador sob a chave `candidateStatus`. Isso significa:
+
+- ✅ Persiste ao fechar e reabrir o navegador
+- ❌ Não sincroniza entre usuários diferentes ou dispositivos diferentes
+
+Quando o backend disponibilizar endpoints de status, basta substituir as funções `setStatus` e `removeStatus` no `app.js` por chamadas à API.
 
 ---
 
