@@ -223,14 +223,15 @@ html, body {
 }
 
 .stat-sub {
-  font-size: 11px;
-  color: var(--text-3);
+  font-size: 12px;
+  color: var(--text);
   font-family: var(--mono);
   margin-top: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 140px;
+  font-weight: 500;
 }
 
 /* ── Controls ── */
@@ -819,4 +820,202 @@ html, body {
 .selected-card-actions {
   display: flex;
   gap: 5px;
+}
+
+/* ── Confirm Dialog ──────────────────────────────────────────────────────────*/
+#confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+}
+
+#confirm-overlay.open {
+  display: flex;
+}
+
+.confirm-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem 1.5rem;
+  width: 100%;
+  max-width: 380px;
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  animation: slide-up 0.15s ease;
+}
+
+.confirm-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(124, 106, 247, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.confirm-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.confirm-msg {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+.confirm-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-family: var(--font);
+  cursor: pointer;
+  border: 1px solid var(--border2);
+  transition: all 0.15s;
+}
+
+.confirm-btn--cancel {
+  background: var(--surface2);
+  color: var(--text-2);
+}
+
+.confirm-btn--cancel:hover {
+  background: var(--border2);
+  color: var(--text);
+}
+
+.confirm-btn--ok {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: rgba(124, 106, 247, 0.3);
+  font-weight: 500;
+}
+
+.confirm-btn--ok:hover {
+  filter: brightness(1.2);
+}
+
+.confirm-btn--ok.confirm-btn--green {
+  background: var(--green-bg);
+  color: var(--green-text);
+  border-color: var(--green-bd);
+}
+
+.confirm-btn--ok.confirm-btn--red {
+  background: #1e1010;
+  color: #e07070;
+  border-color: #5c2020;
+}
+/* ── Filtro por Vaga ─────────────────────────────────────────────────────────*/
+.vaga-toggle-wrap {
+  margin-bottom: 1rem;
+}
+
+.vaga-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: var(--font);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.vaga-toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.vaga-active-label {
+  display: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-family: var(--mono);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.vaga-chevron {
+  font-size: 14px;
+  margin-left: auto;
+  transition: transform 0.2s;
+}
+
+.vaga-chevron--open {
+  transform: rotate(180deg);
+}
+
+.vaga-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.vaga-filters--hidden {
+  display: none;
+}
+
+.vaga-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.vaga-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.vaga-btn--active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
 }
