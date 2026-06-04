@@ -3,20 +3,20 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 from config.settings import settings
-from src.clients.openai_client import analyze_resume_text
-from src.database.connection import SessionLocal
-from src.database.models import Base
-from src.database.repository import CandidateRepository, VacancyRepository
-from src.services.pdf_extractor import PDFExtractor
-from src.services.keyword_analyzer import KeywordAnalyzer
-from src.services.ranking_engine import RankingEngine
+from clients.openai_client import analyze_resume_text
+from database.connection import SessionLocal
+from database.models import Base
+from database.repository import CandidateRepository, VacancyRepository
+from services.pdf_extractor import PDFExtractor
+from services.keyword_analyzer import KeywordAnalyzer
+from services.ranking_engine import RankingEngine
 
 extractor = PDFExtractor()
 analyzer = KeywordAnalyzer()
 
 
 def init_db() -> None:
-    from src.database.connection import engine
+    from database.connection import engine
 
     Base.metadata.create_all(bind=engine)
 
@@ -188,6 +188,46 @@ def analyze_existing_candidate(candidate_id: Optional[str] = None, file_name: Op
             "final_score": candidate.final_score,
             "ranking_level": candidate.ranking_level,
         }
+
+
+def analyze_missing_candidates() -> Dict[str, Any]:
+    processed_ids = []
+    skipped_ids = []
+
+    with SessionLocal() as session:
+        candidates = CandidateRepository.get_without_ai_summary(session)
+        for candidate in candidates:
+            text_to_use = candidate.cleaned_text or candidate.extracted_text
+            if not text_to_use:
+                skipped_ids.append(str(candidate.id))
+                continue
+
+            ai_analysis = analyze_resume_text(text_to_use)
+            ai_data = parse_ai_analysis(ai_analysis)
+
+            updates = {
+                "ai_summary": ai_data.get("summary"),
+                "ai_strengths": ", ".join(ai_data.get("skills", []))
+                if ai_data.get("skills")
+                else None,
+                "ai_weaknesses": None,
+                "ai_seniority": (
+                    str(ai_data.get("experience_years"))
+                    if ai_data.get("experience_years") is not None
+                    else None
+                ),
+            }
+
+            candidate = CandidateRepository.update_candidate(session, candidate, updates)
+            processed_ids.append(str(candidate.id))
+
+    return {
+        "processed": len(processed_ids),
+        "processed_ids": processed_ids,
+        "skipped": len(skipped_ids),
+        "skipped_ids": skipped_ids,
+        "missing_candidates": len(candidates),
+    }
 
 
 def get_candidate_info(candidate_id: Optional[str] = None, file_name: Optional[str] = None) -> Dict[str, Any]:
