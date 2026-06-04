@@ -65,6 +65,14 @@ class CandidateRepository:
         return db.query(CandidateModel).filter(CandidateModel.id == candidate_id).first()
 
     @staticmethod
+    def get_all(db: Session) -> List[CandidateModel]:
+        return db.query(CandidateModel).all()
+
+    @staticmethod
+    def get_without_ai_summary(db: Session) -> List[CandidateModel]:
+        return db.query(CandidateModel).filter(CandidateModel.ai_summary.is_(None)).all()
+
+    @staticmethod
     def update_candidate(db: Session, candidate: CandidateModel, updates: Dict) -> CandidateModel:
         for key, value in updates.items():
             setattr(candidate, key, value)

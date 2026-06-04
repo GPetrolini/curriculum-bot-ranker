@@ -3,7 +3,11 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from src.services.resume_service import analyze_existing_candidate, get_candidate_info
+from services.resume_service import (
+    analyze_existing_candidate,
+    analyze_missing_candidates,
+    get_candidate_info,
+)
 
 router = APIRouter()
 
@@ -34,6 +38,15 @@ async def analyze_resume(request: ResumeAnalyzeRequest):
             "ranking_level": analysis_result["ranking_level"],
         }
 
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/analyze-missing")
+async def analyze_missing_resumes():
+    try:
+        result = analyze_missing_candidates()
+        return {"status": "success", **result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
