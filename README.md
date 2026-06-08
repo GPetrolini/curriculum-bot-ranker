@@ -128,7 +128,7 @@ docker compose up -d
 Airflow UI: `http://localhost:8080`
 
 ## 4. Backend FastAPI via Docker
-O backend FastAPI agora tem um container próprio. Ele expõe a API em `http://localhost:8001`.
+O backend FastAPI tem um container próprio. Em execução local via Docker/compose ele expõe a API em `http://localhost:8000` por padrão (quando executado isoladamente com o Dockerfile/backend ou mapeado para a porta 8000).
 
 Para subir apenas o backend:
 
@@ -149,22 +149,37 @@ docker compose up --build backend
 ```
 
 ### Endpoints disponíveis
-* `POST http://localhost:8001/resume/analyze`
-  * Payload JSON:
+- `POST http://localhost:8000/resume/analyze`
+  - Payload JSON:
 
 ```json
 {
   "candidate_id": "93ce286a-954a-4510-8e35-95689376e716"
 }
 ```
-  * Executa análise de currículo usando o texto já armazenado no banco.
-* `GET http://localhost:8001/resume/info?candidate_id=<id>`
-  * Exemplo:
+  - Executa análise de currículo usando o texto já armazenado no banco e atualiza os campos `ai_summary`, `ai_strengths`, `ai_seniority`.
+- `POST http://localhost:8000/resume/analyze-missing`
+  - Sem body. Varre o banco e gera resumos de IA apenas para candidatos cujo campo `ai_summary` esteja vazio (`null`).
+  - Exemplos:
+
+PowerShell:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/resume/analyze-missing -ContentType "application/json"
+```
+
+curl:
 
 ```bash
-curl "http://localhost:8001/resume/info?candidate_id=93ce286a-954a-4510-8e35-95689376e716"
+curl -X POST http://127.0.0.1:8000/resume/analyze-missing
 ```
-  * Retorna o resumo, seniority e strengths do candidato já calculados.
+- `GET http://localhost:8000/resume/info?candidate_id=<id>`
+  - Exemplo:
+
+```bash
+curl "http://localhost:8000/resume/info?candidate_id=93ce286a-954a-4510-8e35-95689376e716"
+```
+  - Retorna o resumo, seniority e strengths do candidato já calculados.
 
 # Testes
 Este projeto usa `pytest` para testes automatizados e também inclui cenários no padrão BDD com `pytest-bdd`.
