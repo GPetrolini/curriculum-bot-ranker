@@ -1,6 +1,7 @@
 // ── Config ────────────────────────────────────────────────────────────────────
 
-const API_URL = "https://sua-api.com/candidates"; // 🔧 Troque pela URL real do backend
+const API_BASE = "http://localhost:8000"; // 🔧 Troque pela URL base do backend se necessário
+const API_URL  = `${API_BASE}/candidates/`;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
@@ -65,82 +66,7 @@ const VAGAS = [
   { label: "Comunicação / PR",     keywords: ["comunicação", "relações públicas", "assessoria", "imprensa", "jornalismo", "press release"] },
 ];
 
-// ── Mock (remover quando o backend estiver conectado) ─────────────────────────
 
-const MOCK_DATA = [
-  {
-    status: "success",
-    candidate_id: "93ce286a-954a-4510-8e35-95689376e716",
-    name: "Ana Clara",
-    email: "ana@example.com",
-    phone: "+5511999999999",
-    summary: "Engenheira de dados com 5 anos de experiência em Python, ETL e GCP.",
-    skills: ["python", "sql", "airflow"],
-    experience_years: 5,
-    final_score: 78.5,
-    ranking_level: "BOM",
-  },
-  {
-    status: "success",
-    candidate_id: "1a2b3c4d-0000-0000-0000-000000000001",
-    name: "Bruno Martins",
-    email: "bruno@example.com",
-    phone: "+5521988887777",
-    summary: "Analista de dados focado em BI, Power BI e modelagem dimensional.",
-    skills: ["power bi", "sql", "excel"],
-    experience_years: 3,
-    final_score: 87.0,
-    ranking_level: "ÓTIMO",
-  },
-  {
-    status: "success",
-    candidate_id: "1a2b3c4d-0000-0000-0000-000000000002",
-    name: "Carla Souza",
-    email: "carla@example.com",
-    phone: "+5531977776666",
-    summary: "UX designer com foco em pesquisa com usuários e prototipação em Figma.",
-    skills: ["figma", "user research", "prototyping"],
-    experience_years: 4,
-    final_score: 65.0,
-    ranking_level: "REGULAR",
-  },
-  {
-    status: "success",
-    candidate_id: "1a2b3c4d-0000-0000-0000-000000000003",
-    name: "Diego Alves",
-    email: "diego@example.com",
-    phone: "+5541966665555",
-    summary: "Engenheiro back-end especializado em Node.js, microsserviços e AWS.",
-    skills: ["node.js", "docker", "aws"],
-    experience_years: 6,
-    final_score: 91.0,
-    ranking_level: "ÓTIMO",
-  },
-  {
-    status: "success",
-    candidate_id: "1a2b3c4d-0000-0000-0000-000000000004",
-    name: "Elisa Cunha",
-    email: "elisa@example.com",
-    phone: "+5551955554444",
-    summary: "Product manager com experiência em squads ágeis e roadmap estratégico.",
-    skills: ["scrum", "jira", "roadmapping"],
-    experience_years: 7,
-    final_score: 94.0,
-    ranking_level: "ÓTIMO",
-  },
-  {
-    status: "success",
-    candidate_id: "1a2b3c4d-0000-0000-0000-000000000005",
-    name: "Fábio Ramos",
-    email: "fabio@example.com",
-    phone: "+5561944443333",
-    summary: "DevOps engineer com sólida experiência em CI/CD, Kubernetes e Terraform.",
-    skills: ["kubernetes", "terraform", "github actions"],
-    experience_years: 5,
-    final_score: 55.0,
-    ranking_level: "FRACO",
-  },
-];
 
 // ── Avatar Colors ─────────────────────────────────────────────────────────────
 
@@ -206,14 +132,10 @@ async function fetchCandidates() {
   setLoading(true);
 
   try {
-    // Descomente abaixo quando o backend estiver pronto:
-    // const res  = await fetch(API_URL);
-    // const data = await res.json();
-    // candidates = Array.isArray(data) ? data : [data];
-
-    // Mock (remover depois):
-    await new Promise(r => setTimeout(r, 600));
-    candidates = MOCK_DATA;
+    const res  = await fetch(API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    candidates = Array.isArray(data.candidates) ? data.candidates : [];
 
     document.getElementById("totalCount").textContent =
       candidates.length.toLocaleString("pt-BR");
@@ -254,7 +176,7 @@ function updateStats() {
 
   const top = candidates.reduce((a, b) => a.final_score > b.final_score ? a : b);
   document.getElementById("topScore").textContent = formatScore(top.final_score);
-  document.getElementById("topName").textContent  = top.name;
+  document.getElementById("topName").textContent  = top.full_name;
 }
 
 // ── Filtro por Vaga ───────────────────────────────────────────────────────────
@@ -296,9 +218,11 @@ function matchesVaga(candidate, vaga) {
   if (!vaga) return true;
   const vagaObj = VAGAS.find(v => v.label === vaga);
   if (!vagaObj) return true;
+  const skills = candidate.skills || [];
   const haystack = [
-    ...candidate.skills,
-    candidate.summary || "",
+    ...skills,
+    candidate.ai_summary || "",
+    candidate.cleaned_text || "",
   ].join(" ").toLowerCase();
   return vagaObj.keywords.some(kw => haystack.includes(kw.toLowerCase()));
 }
@@ -327,34 +251,35 @@ document.addEventListener("click", e => {
 // ── Render — Lista de candidatos ──────────────────────────────────────────────
 
 function renderRow(candidate) {
-  const av      = getAvatarColor(candidate.name);
+  const av      = getAvatarColor(candidate.full_name);
   const ranking = getRanking(candidate.ranking_level);
   const status  = candidateStatus[candidate.candidate_id];
 
-  const skillsHtml = candidate.skills
+  const skills     = candidate.skills || [];
+  const skillsHtml = skills
     .map(s => `<span class="row-skill">${s}</span>`)
     .join("");
 
   const btnEntrevista = status === "entrevista"
-    ? `<button class="action-btn action-btn--active" onclick="confirmRemover('${candidate.candidate_id}', '${candidate.name}', 'entrevista', event)">
+    ? `<button class="action-btn action-btn--active" onclick="confirmRemover('${candidate.candidate_id}', '${candidate.full_name}', 'entrevista', event)">
          <i class="ti ti-calendar-check"></i> Na entrevista
        </button>`
     : status === "contratado"
     ? `<button class="action-btn action-btn--disabled" disabled>
          <i class="ti ti-calendar-event"></i> Entrevista
        </button>`
-    : `<button class="action-btn" onclick="confirmEntrevista('${candidate.candidate_id}', '${candidate.name}', event)">
+    : `<button class="action-btn" onclick="confirmEntrevista('${candidate.candidate_id}', '${candidate.full_name}', event)">
          <i class="ti ti-calendar-event"></i> Entrevista
        </button>`;
 
   return `
     <div class="row" onclick="openModal('${candidate.candidate_id}')">
       <div class="av" style="background:${av.bg}; color:${av.color}">
-        ${getInitials(candidate.name)}
+        ${getInitials(candidate.full_name)}
       </div>
       <div class="info">
-        <div class="cname">${candidate.name}</div>
-        <div class="crole">${candidate.email}</div>
+        <div class="cname">${candidate.full_name}</div>
+        <div class="crole">${candidate.email || "—"}</div>
         <div class="row-skills">${skillsHtml}</div>
       </div>
       <div class="row-actions">
@@ -404,30 +329,31 @@ function renderSelectedList(elId, list, type) {
   }
 
   el.innerHTML = list.map(c => {
-    const av      = getAvatarColor(c.name);
+    const av      = getAvatarColor(c.full_name);
     const ranking = getRanking(c.ranking_level);
+    const skills  = c.skills || [];
 
     const actionBtn = type === "entrevista"
-      ? `<button class="action-btn action-btn--green" onclick="confirmContratar('${c.candidate_id}', '${c.name}', event)">
+      ? `<button class="action-btn action-btn--green" onclick="confirmContratar('${c.candidate_id}', '${c.full_name}', event)">
            <i class="ti ti-user-check"></i> Contratar
          </button>
-         <button class="action-btn action-btn--remove" onclick="confirmRemover('${c.candidate_id}', '${c.name}', 'entrevista', event)">
+         <button class="action-btn action-btn--remove" onclick="confirmRemover('${c.candidate_id}', '${c.full_name}', 'entrevista', event)">
            <i class="ti ti-x"></i>
          </button>`
-      : `<button class="action-btn action-btn--remove" onclick="confirmRemover('${c.candidate_id}', '${c.name}', 'contratado', event)">
+      : `<button class="action-btn action-btn--remove" onclick="confirmRemover('${c.candidate_id}', '${c.full_name}', 'contratado', event)">
            <i class="ti ti-x"></i> Remover
          </button>`;
 
     return `
       <div class="selected-card">
         <div class="av" style="background:${av.bg}; color:${av.color}">
-          ${getInitials(c.name)}
+          ${getInitials(c.full_name)}
         </div>
         <div class="info">
-          <div class="cname">${c.name}</div>
-          <div class="crole">${c.email}</div>
+          <div class="cname">${c.full_name}</div>
+          <div class="crole">${c.email || "—"}</div>
           <div class="row-skills">
-            ${c.skills.map(s => `<span class="row-skill">${s}</span>`).join("")}
+            ${skills.map(s => `<span class="row-skill">${s}</span>`).join("")}
           </div>
         </div>
         <div class="selected-card-right">
@@ -506,19 +432,21 @@ function go() {
   const query = document.getElementById("searchInput").value.toLowerCase();
   const sort  = document.getElementById("sortSelect").value;
 
-  let list = candidates.filter(c =>
-    (c.name.toLowerCase().includes(query) ||
-    c.email.toLowerCase().includes(query) ||
-    c.skills.some(s => s.toLowerCase().includes(query))) &&
-    matchesVaga(c, activeVaga)
-  );
+  let list = candidates.filter(c => {
+    const skills = c.skills || [];
+    return (
+      (c.full_name || "").toLowerCase().includes(query) ||
+      (c.email || "").toLowerCase().includes(query) ||
+      skills.some(s => s.toLowerCase().includes(query))
+    ) && matchesVaga(c, activeVaga);
+  });
 
   if (sort === "asc") {
     list = [...list].sort((a, b) => b.final_score - a.final_score);
   } else if (sort === "desc") {
     list = [...list].sort((a, b) => a.final_score - b.final_score);
   } else {
-    list = [...list].sort((a, b) => a.name.localeCompare(b.name, "pt"));
+    list = [...list].sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "", "pt"));
   }
 
   render(list);
@@ -530,13 +458,15 @@ function openModal(candidateId) {
   const c = candidates.find(c => c.candidate_id === candidateId);
   if (!c) return;
 
-  const ranking = getRanking(c.ranking_level);
+  const ranking    = getRanking(c.ranking_level);
+  const skills     = c.skills || [];
+  const expYears   = c.ai_seniority != null ? `${c.ai_seniority} anos` : "—";
 
-  document.getElementById("modal-name").textContent    = c.name;
-  document.getElementById("modal-email").textContent   = c.email;
-  document.getElementById("modal-phone").textContent   = c.phone;
-  document.getElementById("modal-summary").textContent = c.summary;
-  document.getElementById("modal-exp").textContent     = `${c.experience_years} anos`;
+  document.getElementById("modal-name").textContent    = c.full_name || "—";
+  document.getElementById("modal-email").textContent   = c.email || "—";
+  document.getElementById("modal-phone").textContent   = c.phone || "—";
+  document.getElementById("modal-summary").textContent = c.ai_summary || "—";
+  document.getElementById("modal-exp").textContent     = expYears;
   document.getElementById("modal-score").textContent   = `${formatScore(c.final_score)}%`;
   document.getElementById("modal-id").textContent      = c.candidate_id;
 
@@ -544,7 +474,7 @@ function openModal(candidateId) {
   rankEl.textContent = ranking.label;
   rankEl.className   = `modal-badge ${ranking.badgeClass}`;
 
-  document.getElementById("modal-skills").innerHTML = c.skills
+  document.getElementById("modal-skills").innerHTML = skills
     .map(s => `<span class="skill-tag">${s}</span>`)
     .join("");
 
