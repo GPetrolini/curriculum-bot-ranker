@@ -1,5 +1,6 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, LargeBinary, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -81,3 +82,13 @@ class CandidateKeywordModel(Base):
     keyword_score = Column(Integer, nullable=True)
 
     candidate = relationship("CandidateModel", back_populates="keywords")
+
+
+class RawResumeModel(Base):
+    __tablename__ = "raw_resumes"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    file_name = Column(String(255), nullable=False)
+    file_content = Column(LargeBinary, nullable=False)
+    status = Column(String(50), default="pending")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
