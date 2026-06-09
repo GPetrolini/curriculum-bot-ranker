@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
 from config.settings import settings
@@ -15,6 +16,14 @@ from services.pdf_extractor import PDFExtractor
 from services.ranking_engine import RankingEngine
 
 app = FastAPI(title="CV Ranker API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(resume_router, prefix="/resume", tags=["resume"])
 app.include_router(candidate_router, prefix="/candidates", tags=["candidates"])
 
