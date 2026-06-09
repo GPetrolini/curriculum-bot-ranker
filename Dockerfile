@@ -1,8 +1,21 @@
-FROM apache/airflow:2.8.1-python3.11
+FROM python:3.11-slim
 
-RUN pip install --no-cache-dir \
-    pdfplumber==0.11.0 \
-    google-generativeai==0.8.3 \
-    psycopg2-binary==2.9.9 \
-    sqlalchemy==1.4.49 \
-    python-dotenv==1.0.1
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    gcc \
+    libpq-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /app
+
+ENV PYTHONPATH=/app/src
+ENV PORT=8000
+
+EXPOSE 8000
+
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
