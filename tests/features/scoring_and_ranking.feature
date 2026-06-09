@@ -20,9 +20,13 @@ Feature: Score e ranking de candidatos
 
     Examples:
       | final_score | expected_ranking |
-      | 90          | EXCELENTE        |
+      | 95          | EXCELENTE        |
+      | 80          | EXCELENTE        |
+      | 65          | BOM              |
       | 50          | BOM              |
+      | 35          | MEDIANO          |
       | 30          | MEDIANO          |
+      | 10          | FRACO            |
       | 0           | FRACO            |
 
   Scenario: Aplicar ranking ao payload do candidato

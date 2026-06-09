@@ -7,11 +7,15 @@ scenarios("features/scoring_and_ranking.feature")
 
 @given(parsers.parse('o candidato tem skills "{skills}"'), target_fixture='candidate_skills')
 def candidate_skills(skills):
+    if not skills or skills.strip() == "":
+        return []
     return [skill.strip() for skill in skills.split(",") if skill.strip()]
 
 
 @given(parsers.parse('o trabalho exige skills "{required_skills}"'), target_fixture='required_skills')
 def required_skills(required_skills):
+    if not required_skills or required_skills.strip() == "":
+        return []
     return [skill.strip() for skill in required_skills.split(",") if skill.strip()]
 
 
