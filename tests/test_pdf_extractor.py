@@ -1,6 +1,3 @@
-import pytest
-from pathlib import Path
-from io import BytesIO
 from src.services.pdf_extractor import PDFExtractor
 
 

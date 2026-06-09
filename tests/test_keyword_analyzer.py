@@ -1,4 +1,3 @@
-import pytest
 from src.services.keyword_analyzer import KeywordAnalyzer
 
 

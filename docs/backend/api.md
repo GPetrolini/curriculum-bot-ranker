@@ -2,6 +2,66 @@
 
 Esta página explica as rotas do backend e mostra os trechos reais das funções que elas usam.
 
+## `GET /`
+
+Endpoint raiz da API, implementado em `src/main.py`.
+
+```python
+@app.get("/")
+def root() -> dict:
+    return {"message": "CV Ranker API is ready"}
+```
+
+Retorna uma mensagem de confirmação que a API está pronta.
+
+## `POST /process`
+
+Endpoint para processamento de PDFs da tabela `raw_resumes`, implementado em `src/main.py`.
+
+```python
+@app.post("/process")
+def run_processing() -> dict:
+    return process_assets()
+```
+
+A função `process_assets()` consulta a tabela `raw_resumes`, processa cada PDF usando `process_pdf_from_db()` e cria candidatos na tabela `candidates`:
+
+```python
+def process_assets() -> dict:
+    init_db()
+
+    processed_ids: List[str] = []
+    with SessionLocal() as session:
+        vacancy = get_or_create_vacancy(session)
+
+        raw_resumes = session.query(RawResumeModel).all()
+
+        print(f"Encontrados {len(raw_resumes)} PDFs na tabela raw_resumes")
+
+        if not raw_resumes:
+            return {"processed": 0, "message": "Nenhum PDF encontrado na tabela raw_resumes"}
+
+        for raw_resume in raw_resumes:
+            print(f"Processando: {raw_resume.file_name}")
+            existing = CandidateRepository.get_by_file_name(session, raw_resume.file_name)
+            if existing:
+                print(f"Já existe candidato para {raw_resume.file_name}, pulando...")
+                continue
+
+            try:
+                candidate = process_pdf_from_db(raw_resume, vacancy, session)
+                processed_ids.append(str(candidate.id))
+                print(f"Sucesso: {raw_resume.file_name}")
+            except SQLAlchemyError as exc:
+                raise RuntimeError(
+                    f"Falha ao salvar candidato para {raw_resume.file_name}: {exc}"
+                ) from exc
+            except Exception as exc:
+                print(f"Falha no processamento de {raw_resume.file_name}: {exc}")
+
+    return {"processed": len(processed_ids), "candidate_ids": processed_ids}
+```
+
 ## `GET /candidates/`
 
 Implementado em `src/routes/candidate_routes.py`.
