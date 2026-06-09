@@ -1,56 +1,60 @@
-# 📄 CV Ranker - AI Resume Analyzer
+# CV Ranker - AI Resume Analyzer
 
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=FastAPI&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
 ![Apache Airflow](https://img.shields.io/badge/Airflow-017CEE?style=for-the-badge&logo=Apache%20Airflow&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Google Cloud](https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white)
-![Gemini AI](https://img.shields.io/badge/Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)
+![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
+![MkDocs](https://img.shields.io/badge/MkDocs-000000?style=for-the-badge&logo=markdown&logoColor=white)
 
-> Ferramenta automatizada de leitura, estruturação e ranqueamento de currículos impulsionada por Inteligência Artificial.
+> Ferramenta automatizada de leitura, estruturação e ranqueamento de currículos impulsionada por Inteligência Artificial (LLMs).
 
+ **Status:** *Este projeto está em fase ativa de desenvolvimento. A infraestrutura de dados, modelagem do banco e orquestração de IA já estão operantes. As integrações finais entre microserviços e a interface (Frontend) estão em andamento.*
 
-> Este projeto está em fase ativa de desenvolvimento (Sprint atual). A infraestrutura base já está operante, mas as integrações de Inteligência Artificial e a interface final ainda estão sendo implementadas assim como o README.
+---
+
 ## Sobre o Projeto
-Projeto desenvolvido para a UC de **Gestão de Qualidade de Software** do curso de Análise e Desenvolvimento de Sistemas.
+Projeto desenvolvido para a Unidade Curricular de **Gestão de Qualidade de Software** do curso de Análise e Desenvolvimento de Sistemas.
 
-**Instituição:** UNISUL - Florianópolis, SC.
-
-**Professor:** Prof. Dr. Saulo Popov Zambiasi
-
+* **Instituição:** UNISUL - Florianópolis, SC.
+* **Professor:** Prof. Dr. Saulo Popov Zambiasi
 
 **Equipe de Desenvolvimento:**
-* **Gustavo Petrolini** (10724112917) - Engenharia de Dados / Banco de Dados
-*  **Gustavo Perino** (1072412639) - Backend
-*  **Leonardo Vivan** (1072416471) - Frontend
-*  **Tiago Machado** (1072410017) - Frontend 
-*  **Natã Batista** (1072415016) - Integração IA
+* **Gustavo Petrolini** (10724112917) - Engenharia de Dados / Cloud / Banco de Dados
+* **Gustavo Perino** (1072412639) - Backend & IA
+* **Leonardo Vivan** (1072416471) - Frontend
+* **Tiago Machado** (1072410017) - Frontend 
+* **Natã Batista** (1072415016) - Integração IA / Pipeline BDD
 
 ---
 
 ## Escopo e Arquitetura
 
-O **CV Ranker** visa acelerar o processo de triagem em processos seletivos, reduzindo o tempo de leitura humana e padronizando a avaliação dos candidatos de forma técnica.
+O **CV Ranker** visa acelerar o processo de triagem em processos seletivos, reduzindo drasticamente o tempo de leitura humana e padronizando a avaliação dos candidatos de forma técnica e imparcial.
 
-**Pipeline de Dados:**
-1. **Ingestão (Bronze):** Leitura de arquivos PDF/DOCX armazenados localmente e envio automatizado para o Data Lake (Google Cloud Storage).
-2. **Processamento (Silver):** Extração de texto via Python e estruturação semântica (nome, skills, experiência) utilizando a API do Google Gemini.
-3. **Armazenamento (Gold):** Persistência dos dados estruturados em banco relacional PostgreSQL para consumo da aplicação.
-4. **Aplicação:** Interface e API para RH ranquear e visualizar o *match* dos candidatos com a vaga.
+### O Fluxo de Dados e Processamento:
+1. **Ingestão:** O currículo (PDF) chega através do bot e é armazenado de forma segura, acionando a API.
+2. **Extração & Score:** O Backend extrai o texto do PDF e o analisa através de um motor de pontuação (Score), buscando as habilidades obrigatórias (`must_have`) e desejáveis (`nice_to_have`).
+3. **Análise Semântica (IA):** Integração com **OpenAI** para leitura humana avançada, gerando um resumo profissional e definindo a senioridade do candidato.
+4. **Armazenamento:** Persistência dos dados estruturados e notas em um banco **PostgreSQL (Neon)**.
+5. **Analytics:** O **Apache Airflow** extrai os dados processados e realiza a carga (ELT) no Data Lake/Data Warehouse (**Google Cloud Platform**) para geração de dashboards e métricas do RH.
 
 ---
 
 ## Algoritmo de Ranqueamento
-O processamento atual do projeto segue estas etapas:
-1. O PDF é extraído para texto através do módulo de extração.
-2. O texto é limpo e analisado pelo `KeywordAnalyzer` para identificar skills obrigatórias e desejáveis.
-3. O score final é calculado a partir dos pontos de `must_have` e `nice_to_have`.
-4. O `RankingEngine` converte o score em um nível de ranking:
-   - `80+` → `EXCELENTE`
-   - `50-79` → `BOM`
-   - `30-49` → `MEDIANO`
-   - `0-29` → `FRACO`
-5. Cada candidato é salvo no banco PostgreSQL e o script principal pode exibir no terminal o ranking ordenado com `nome`, `score` e `nível`.
+
+O motor de *ranking* avalia a compatibilidade do candidato com a vaga seguindo esta régua de notas (Score):
+
+* **80+ pontos** ➔ `EXCELENTE`
+* **50 a 79 pontos** ➔ `BOM`
+* **30 a 49 pontos** ➔ `MEDIANO`
+* **0 a 29 pontos** ➔ `FRACO`
 
 ---
 
@@ -65,7 +69,7 @@ O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em se
   * Criação do Pipeline de Ingestão (DAGs) conectando dados brutos locais ao Data Lake no GCP.
   * Injeção de credenciais de nuvem automatizada via variáveis de ambiente.
 
-### 2. Backend & IA (Gustavo Perino)
+### 2. Backend & IA (Gustavo Perino / Natã Batista)
 * **Tecnologias:** Python, FastAPI, OpenAI / Google Gemini, SQLAlchemy, Docker.
 * **Status Atual:**
   * API FastAPI implementada com rotas de análise e consulta de candidatos.
@@ -73,47 +77,31 @@ O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em se
   * Serviço Docker dedicado `backend` disponível em `docker-compose.yaml`.
   * Suporte a variáveis de ambiente via `.env` para `DATABASE_URL`, `OPENAI_API_KEY` e demais credenciais.
 
-###  3. Frontend ([Nome])
-* **Tecnologias:** [React / HTML / CSS / etc]
+### 3. Frontend (Leonardo Vivan & Tiago Machado)
+* **Tecnologias:** HTML5, CSS3, Vanilla JavaScript.
 * **Status Atual:**
-  * [Descrever o progresso].
+  * Estrutura base da interface criada (HTML).
+  * Estilização em progresso via CSS.
+  * Lógica de consumo da API (Javascript) em fase de integração.
 
 ---
 
-##  Estrutura do Repositório
+## Como Executar Localmente
 
-```text
-📦 cv-ranker
- ┣ 📂 .github/workflows/  # Pipelines de CI/CD automatizados (GitHub Actions)
- ┣ 📂 alembic/            # Migrações e versionamento do banco de dados
- ┣ 📂 config/             # Arquivos de configuração global do projeto
- ┣ 📂 dags/               # Orquestração de pipelines de dados (Apache Airflow)
- ┣ 📂 docs/               # Documentação complementar do projeto
- ┣ 📂 etl/                # Scripts Python (Extração, Transformação e Carga)
- ┣ 📂 src/                # Código-fonte da aplicação (Backend API e lógicas core)
- ┣ 📂 terraform/          # Infraestrutura como Código (IaC) para o GCP
- ┣ 📂 tests/              # Testes unitários e de integração
- ┣ 📜 .env.example        # Template seguro de variáveis de ambiente
- ┣ 📜 docker-compose.yaml # Orquestração dos containers (Airflow, Postgres, etc.)
- ┣ 📜 init-db.sh          # Script de inicialização e seed do banco de dados
- ┣ 📜 requirements.txt    # Dependências de pacotes do Python
- ┗ 📜 README.md           # Documentação principal
- ```
+### Pré-requisitos
+* `Docker` e `Docker Compose` instalados.
+* Uma conta no GCP (Google Cloud) e chaves de API (OpenAI/Gemini).
 
-# Como Executar Localmente
-Pré-requisitos: ```Docker``` e ```Docker Compose```.
-
-## 1. Clone o repositório:
-
-```bash
-git clone https://github.com/SEU_USUARIO/cv-ranker.git
-cd cv-ranker
+### 1. Clonar o Repositório
+```
+git clone [https://github.com/GPetrolini/curriculum-bot-ranker.git](https://github.com/GPetrolini/curriculum-bot-ranker.git)
+cd curriculum-bot-ranker
 ```
 
 ## 2. Configuração de Variáveis:
 Crie uma cópia do `.env.example` e renomeie para `.env`.
 
-```bash
+```
 cp .env.example .env
 ```
 
@@ -121,7 +109,7 @@ Preencha o `.env` com as credenciais do GCP e demais chaves da aplicação.
 
 ## 3. Suba a Infraestrutura:
 
-```bash
+```
 docker compose up -d
 ```
 
