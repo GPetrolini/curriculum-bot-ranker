@@ -46,7 +46,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: Dockerfile.backend
+      dockerfile: Dockerfile
     container_name: cv_ranker_api
     env_file:
       - .env
