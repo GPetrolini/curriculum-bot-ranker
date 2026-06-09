@@ -19,3 +19,8 @@ apache-airflow-providers-postgres
 
 pytest
 pytest-bdd
+
+mkdocs>=1.5.2
+mkdocs-material>=9.0.0
+pymdown-extensions
+mkdocs-mermaid2-plugin

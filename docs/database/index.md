@@ -15,18 +15,30 @@ Nosso banco de dados foi projetado para ser relacional, rápido e escalável, at
 
 Criamos a tabela `raw_resumes` para atuar como uma "caixa de entrada". O bot envia o PDF físico para lá, e a API consome de forma assíncrona.
 
-::: mermaid
+```mermaid
 sequenceDiagram
     participant Bot as Bot (WhatsApp)
-    participant DB as PostgreSQL (Neon)
-    participant Back as Backend (Python)
-    
-    Bot->>DB: INSERT PDF na tabela raw_resumes (status='pending')
-    Back->>DB: SELECT * FROM raw_resumes WHERE status='pending'
-    Back->>Back: Extrai Texto + Processa IA + Calcula Score
-    Back->>DB: INSERT INTO candidates (Salva o ranking)
-    Back->>DB: UPDATE raw_resumes SET status='processed'
-:::
+    participant RawDB as PostgreSQL (raw_resumes)
+    participant API as FastAPI
+    participant Extractor as PDFExtractor
+    participant Analyzer as KeywordAnalyzer
+    participant Ranker as RankingEngine
+    participant CandDB as PostgreSQL (candidates)
+
+    Bot->>RawDB: INSERT PDF (file_content, file_name, status='pending')
+    API->>RawDB: POST /process
+    RawDB-->>API: Retorna lista de PDFs
+    loop Para cada PDF
+        API->>Extractor: extract(bytes, file_name)
+        Extractor-->>API: Retorna dados extraídos
+        API->>Analyzer: analyze_vacancy_keywords(cleaned_text)
+        Analyzer-->>API: Retorna scores
+        API->>Ranker: apply(candidate_payload)
+        Ranker-->>API: Adiciona ranking_level
+        API->>CandDB: INSERT candidate
+        CandDB-->>API: Candidato criado
+    end
+```
 
 ---
 
