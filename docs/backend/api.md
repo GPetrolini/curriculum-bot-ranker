@@ -14,6 +14,18 @@ def root() -> dict:
 
 Retorna uma mensagem de confirmação que a API está pronta.
 
+### Fluxo do endpoint GET /
+
+```mermaid
+sequenceDiagram
+    participant Client as Cliente
+    participant API as FastAPI
+    participant DB as PostgreSQL
+
+    Client->>API: GET /
+    API-->>Client: {"message": "CV Ranker API is ready"}
+```
+
 ## `POST /process`
 
 Endpoint para processamento de PDFs da tabela `raw_resumes`, implementado em `src/main.py`.
@@ -62,6 +74,34 @@ def process_assets() -> dict:
     return {"processed": len(processed_ids), "candidate_ids": processed_ids}
 ```
 
+### Fluxo do endpoint POST /process
+
+```mermaid
+sequenceDiagram
+    participant Client as Cliente
+    participant API as FastAPI
+    participant RawDB as PostgreSQL (raw_resumes)
+    participant Extractor as PDFExtractor
+    participant Analyzer as KeywordAnalyzer
+    participant Ranker as RankingEngine
+    participant CandDB as PostgreSQL (candidates)
+
+    Client->>API: POST /process
+    API->>RawDB: SELECT * FROM raw_resumes
+    RawDB-->>API: Retorna lista de PDFs
+    loop Para cada PDF
+        API->>Extractor: extract(bytes, file_name)
+        Extractor-->>API: Retorna dados extraídos
+        API->>Analyzer: analyze_vacancy_keywords(cleaned_text)
+        Analyzer-->>API: Retorna scores
+        API->>Ranker: apply(candidate_payload)
+        Ranker-->>API: Adiciona ranking_level
+        API->>CandDB: INSERT candidate
+        CandDB-->>API: Candidato criado
+    end
+    API-->>Client: {"processed": N, "candidate_ids": [...]}
+```
+
 ## `GET /candidates/`
 
 Implementado em `src/routes/candidate_routes.py`.
@@ -78,6 +118,26 @@ def list_candidates():
         "status": "success",
         "candidates": [serialize_candidate(candidate) for candidate in candidates],
     }
+```
+
+O método `serialize_candidate()` transforma o modelo em JSON e calcula o campo `skills` a partir de `ai_strengths`.
+
+### Fluxo do endpoint GET /candidates/
+
+```mermaid
+sequenceDiagram
+    participant Client as Cliente
+    participant API as FastAPI
+    participant CandDB as PostgreSQL (candidates)
+    participant Repo as CandidateRepository
+
+    Client->>API: GET /candidates/
+    API->>CandDB: SELECT * FROM candidates
+    CandDB-->>API: Retorna lista de candidatos
+    loop Para cada candidato
+        API->>API: serialize_candidate(candidate)
+    end
+    API-->>Client: {"status": "success", "candidates": [...]}
 ```
 
 O método `serialize_candidate()` transforma o modelo em JSON e calcula o campo `skills` a partir de `ai_strengths`.
@@ -114,6 +174,30 @@ async def analyze_resume(request: ResumeAnalyzeRequest):
 
 A função `analyze_existing_candidate()` está em `src/services/resume_service.py` e atualiza apenas o candidato existente.
 
+### Fluxo do endpoint POST /resume/analyze
+
+```mermaid
+sequenceDiagram
+    participant Client as Cliente
+    participant API as FastAPI
+    participant Service as ResumeService
+    participant CandDB as PostgreSQL (candidates)
+    participant OpenAI as OpenAI Client
+
+    Client->>API: POST /resume/analyze {candidate_id}
+    API->>CandDB: SELECT * FROM candidates WHERE id = ?
+    CandDB-->>API: Retorna candidato
+    API->>Service: analyze_existing_candidate(candidate)
+    Service->>CandDB: SELECT extracted_text FROM candidates
+    CandDB-->>Service: Retorna texto extraído
+    Service->>OpenAI: analyze_resume_text(text)
+    OpenAI-->>Service: Retorna análise JSON
+    Service->>CandDB: UPDATE candidate SET ai_summary, ai_strengths, etc.
+    CandDB-->>Service: Candidato atualizado
+    Service-->>API: Retorna resultado da análise
+    API-->>Client: {"status": "success", "candidate_id": ..., "skills": [...]}
+```
+
 ## `POST /resume/analyze-missing`
 
 Endpoint para análise em lote, também em `src/routes/resume_routes.py`.
@@ -130,6 +214,32 @@ async def analyze_missing_resumes():
 
 `analyze_missing_candidates()` em `src/services/resume_service.py` percorre o banco buscando candidatos sem `ai_summary` e atualiza apenas esses registros.
 
+### Fluxo do endpoint POST /resume/analyze-missing
+
+```mermaid
+sequenceDiagram
+    participant Client as Cliente
+    participant API as FastAPI
+    participant Service as ResumeService
+    participant CandDB as PostgreSQL (candidates)
+    participant OpenAI as OpenAI Client
+
+    Client->>API: POST /resume/analyze-missing
+    API->>CandDB: SELECT * FROM candidates WHERE ai_summary IS NULL
+    CandDB-->>API: Retorna lista de candidatos sem análise
+    loop Para cada candidato
+        API->>Service: analyze_existing_candidate(candidate)
+        Service->>CandDB: SELECT extracted_text FROM candidates
+        CandDB-->>Service: Retorna texto extraído
+        Service->>OpenAI: analyze_resume_text(text)
+        OpenAI-->>Service: Retorna análise JSON
+        Service->>CandDB: UPDATE candidate SET ai_summary, ai_strengths, etc.
+        CandDB-->>Service: Candidato atualizado
+    end
+    Service-->>API: Retorna resultado do processamento em lote
+    API-->>Client: {"status": "success", "processed": N, "candidate_ids": [...]}
+```
+
 ## `GET /resume/info`
 
 Retorna dados de análise de IA já armazenados para um candidato, consultando por `candidate_id` ou `file_name`.
@@ -142,4 +252,21 @@ async def get_resume_info(candidate_id: Optional[str] = None, file_name: Optiona
         return {"status": "success", **info}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+```
+
+### Fluxo do endpoint GET /resume/info
+
+```mermaid
+sequenceDiagram
+    participant Client as Cliente
+    participant API as FastAPI
+    participant Service as ResumeService
+    participant CandDB as PostgreSQL (candidates)
+
+    Client->>API: GET /resume/info?candidate_id=xxx
+    API->>CandDB: SELECT * FROM candidates WHERE id = ?
+    CandDB-->>API: Retorna candidato
+    API->>Service: get_candidate_info(candidate)
+    Service-->>API: Retorna dados de análise (ai_summary, skills, etc.)
+    API-->>Client: {"status": "success", "summary": ..., "skills": [...]}
 ```

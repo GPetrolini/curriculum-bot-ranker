@@ -21,28 +21,32 @@ Use a barra lateral para abrir cada área. Cada página contém:
 
 Apenas a seção `Frontend` está vazia porque não há código de frontend no repositório.
 
-├── Dockerfile.backend
+```
+├── Dockerfile
+├── Dockerfile.airflow
 ├── docker-compose.yaml
 ├── README.md
+├── alembic/
+├── dags/
+├── docs/
+├── etl/
+├── frontend/
 ├── src/
+│   ├── __init__.py
+│   ├── api.py
+│   ├── extractor.py
 │   ├── main.py
 │   ├── clients/
-│   │   └── openai_client.py
 │   ├── config/
-│   │   └── settings.py
 │   ├── database/
-│   │   ├── connection.py
-│   │   ├── models.py
-│   │   └── repository.py
 │   ├── routes/
-│   │   ├── candidate_routes.py
-│   │   └── resume_routes.py
-│   └── services/
-│       ├── pdf_extractor.py
-│       ├── keyword_analyzer.py
-│       ├── ranking_engine.py
-│       └── resume_service.py
-└── assets/
+│   ├── schemas/
+│   ├── services/
+│   └── utils/
+├── tests/
+├── assets/
+├── terraform/
+└── .venv/
 ```
 
 Descrição breve de diretórios:
@@ -51,24 +55,6 @@ Descrição breve de diretórios:
 - `src/database`: models, connection e repository (SQLAlchemy).
 - `src/routes`: rotas FastAPI.
 - `src/services`: lógica de negócio (extração, análise, ranking).
-
----
-
-# Fluxo Geral do Sistema
-
-Mermaid consolidado:
-
-```mermaid
-flowchart TD
-    U[Usuário / Job] --> F[Backend FastAPI]
-    F -->|lista/processa| Candidates[/candidates/ e /process/]
-    F -->|analisa IA| AI[OpenAI/Gemini]
-    F --> DB[(Postgres)]
-    Candidates --> DB
-    AI --> DB
-    DB --> F
-    F --> Client[Frontend / CLI / Consumer]
-```
 
 ---
 
