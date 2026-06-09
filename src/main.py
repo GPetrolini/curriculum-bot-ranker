@@ -6,8 +6,9 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from config.settings import settings
 from database.connection import SessionLocal, engine
-from database.models import Base, CandidateModel, VacancyModel
+from database.models import Base, CandidateModel, VacancyModel, RawResumeModel
 from database.repository import CandidateRepository, VacancyRepository
+from routes.candidate_routes import router as candidate_router
 from routes.resume_routes import router as resume_router
 from services.keyword_analyzer import KeywordAnalyzer
 from services.pdf_extractor import PDFExtractor
@@ -15,6 +16,7 @@ from services.ranking_engine import RankingEngine
 
 app = FastAPI(title="CV Ranker API")
 app.include_router(resume_router, prefix="/resume", tags=["resume"])
+app.include_router(candidate_router, prefix="/candidates", tags=["candidates"])
 
 
 @app.on_event("startup")
@@ -92,31 +94,75 @@ def process_pdf(pdf_path: Path, vacancy: VacancyModel, session) -> CandidateMode
     )
 
 
+def process_pdf_from_db(raw_resume: RawResumeModel, vacancy: VacancyModel, session) -> CandidateModel:
+    raw_payload = extractor.extract(raw_resume.file_content, raw_resume.file_name)
+    analysis = analyzer.analyze_vacancy_keywords(raw_payload["cleaned_text"], vacancy.keywords)
+
+    candidate_payload = {
+        "full_name": raw_payload["full_name"],
+        "email": raw_payload["email"],
+        "phone": raw_payload["phone"],
+        "age": None,
+        "linkedin_url": raw_payload["linkedin_url"],
+        "github_url": raw_payload["github_url"],
+        "vacancy_applied": vacancy.title,
+        "pdf_file_name": raw_payload["pdf_file_name"],
+        "pdf_storage_url": raw_payload["pdf_storage_url"],
+        "pdf_pages": raw_payload["pdf_pages"],
+        "extracted_text": raw_payload["extracted_text"],
+        "cleaned_text": raw_payload["cleaned_text"],
+        "total_words": analysis["total_words"],
+        "total_characters": analysis["total_characters"],
+        "must_have_score": analysis["must_have_score"],
+        "nice_to_have_score": analysis["nice_to_have_score"],
+        "final_score": analysis["final_score"],
+        "ranking_level": None,
+        "ai_summary": None,
+        "ai_strengths": None,
+        "ai_weaknesses": None,
+        "ai_seniority": None,
+    }
+
+    candidate_payload = RankingEngine.apply(candidate_payload)
+
+    return CandidateRepository.create_candidate(
+        session,
+        candidate_data=candidate_payload,
+        keyword_records=analysis["keyword_records"],
+    )
+
+
 def process_assets() -> dict:
     init_db()
-    source_path = Path(settings.ASSETS_PATH)
-    pdf_files = sorted(source_path.glob("*.pdf"))
-
-    if not pdf_files:
-        return {"processed": 0, "message": "Nenhum PDF encontrado em assets/"}
 
     processed_ids: List[str] = []
     with SessionLocal() as session:
         vacancy = get_or_create_vacancy(session)
-        for pdf_path in pdf_files:
-            existing = CandidateRepository.get_by_file_name(session, pdf_path.name)
+
+        raw_resumes = session.query(RawResumeModel).all()
+
+        print(f"Encontrados {len(raw_resumes)} PDFs na tabela raw_resumes")
+
+        if not raw_resumes:
+            return {"processed": 0, "message": "Nenhum PDF encontrado na tabela raw_resumes"}
+
+        for raw_resume in raw_resumes:
+            print(f"Processando: {raw_resume.file_name}")
+            existing = CandidateRepository.get_by_file_name(session, raw_resume.file_name)
             if existing:
+                print(f"Já existe candidato para {raw_resume.file_name}, pulando...")
                 continue
 
             try:
-                candidate = process_pdf(pdf_path, vacancy, session)
+                candidate = process_pdf_from_db(raw_resume, vacancy, session)
                 processed_ids.append(str(candidate.id))
+                print(f"Sucesso: {raw_resume.file_name}")
             except SQLAlchemyError as exc:
                 raise RuntimeError(
-                    f"Falha ao salvar candidato para {pdf_path.name}: {exc}"
+                    f"Falha ao salvar candidato para {raw_resume.file_name}: {exc}"
                 ) from exc
             except Exception as exc:
-                print(f"Falha no processamento de {pdf_path.name}: {exc}")
+                print(f"Falha no processamento de {raw_resume.file_name}: {exc}")
 
     return {"processed": len(processed_ids), "candidate_ids": processed_ids}
 
