@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List
+from datetime import datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -159,18 +160,28 @@ def process_assets() -> dict:
             print(f"Processando: {raw_resume.file_name}")
             existing = CandidateRepository.get_by_file_name(session, raw_resume.file_name)
             if existing:
-                print(f"Já existe candidato para {raw_resume.file_name}, pulando...")
+                print(f"Já existe candidato para {raw_resume.file_name}, marcando como processado...")
+                raw_resume.status = "processed"
+                raw_resume.processed_at = datetime.utcnow()
+                session.commit()
                 continue
 
             try:
                 candidate = process_pdf_from_db(raw_resume, vacancy, session)
+                raw_resume.status = "processed"
+                raw_resume.processed_at = datetime.utcnow()
+                session.commit()
                 processed_ids.append(str(candidate.id))
                 print(f"Sucesso: {raw_resume.file_name}")
             except SQLAlchemyError as exc:
+                raw_resume.status = "error"
+                session.commit()
                 raise RuntimeError(
                     f"Falha ao salvar candidato para {raw_resume.file_name}: {exc}"
                 ) from exc
             except Exception as exc:
+                raw_resume.status = "error"
+                session.commit()
                 print(f"Falha no processamento de {raw_resume.file_name}: {exc}")
 
     return {"processed": len(processed_ids), "candidate_ids": processed_ids}

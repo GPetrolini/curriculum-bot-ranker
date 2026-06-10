@@ -92,3 +92,4 @@ class RawResumeModel(Base):
     file_content = Column(LargeBinary, nullable=False)
     status = Column(String(50), default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    processed_at = Column(DateTime(timezone=True), nullable=True)
