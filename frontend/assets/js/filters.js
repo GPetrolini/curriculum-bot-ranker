@@ -68,5 +68,6 @@ function go() {
     list = [...list].sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "", "pt"));
   }
 
+  currentPage = 1;
   render(list);
 }
