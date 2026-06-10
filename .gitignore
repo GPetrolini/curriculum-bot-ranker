@@ -32,3 +32,5 @@ logs/
 *.swp
 .DS_Store
 *.json
+!package.json
+!package-lock.json
