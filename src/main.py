@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import List
 from datetime import datetime
+import threading
+import requests
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,6 +43,33 @@ def startup_event() -> None:
         command.upgrade(alembic_cfg, "head")
     except Exception as e:
         print(f"Aviso: Não foi possível rodar migrações automaticamente: {e}")
+    
+    # Iniciar background worker como thread
+    def run_worker():
+        import time
+        import logging
+        logger = logging.getLogger(__name__)
+        api_url = "http://localhost:8000/process"
+        interval = getattr(settings, 'BACKGROUND_WORKER_INTERVAL', 30)
+        
+        logger.info(f"Iniciando background worker (intervalo: {interval}s)")
+        
+        while True:
+            try:
+                response = requests.post(api_url, timeout=30)
+                if response.status_code == 200:
+                    result = response.json()
+                    processed = result.get("processed", 0)
+                    if processed > 0:
+                        logger.info(f"Worker: {processed} PDFs processados")
+                time.sleep(interval)
+            except Exception as exc:
+                logger.error(f"Worker error: {exc}")
+                time.sleep(interval)
+    
+    worker_thread = threading.Thread(target=run_worker, daemon=True)
+    worker_thread.start()
+    print("Background worker iniciado como thread daemon")
 
 
 extractor = PDFExtractor()
