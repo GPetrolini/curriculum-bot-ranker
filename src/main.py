@@ -33,17 +33,19 @@ app.include_router(candidate_router, prefix="/candidates", tags=["candidates"])
 
 @app.on_event("startup")
 def startup_event() -> None:
+    print("=== STARTUP EVENT INICIADO ===")
     Base.metadata.create_all(bind=engine)
     # Rodar migrações pendentes
     try:
         from alembic.config import Config
         from alembic import command
-        
+
         alembic_cfg = Config("alembic.ini")
         command.upgrade(alembic_cfg, "head")
+        print("=== MIGRAÇÕES CONCLUÍDAS ===")
     except Exception as e:
         print(f"Aviso: Não foi possível rodar migrações automaticamente: {e}")
-    
+
     # Iniciar background worker como thread
     def run_worker():
         import time
@@ -51,25 +53,32 @@ def startup_event() -> None:
         logger = logging.getLogger(__name__)
         api_url = "http://localhost:8000/process"
         interval = getattr(settings, 'BACKGROUND_WORKER_INTERVAL', 30)
-        
+
+        print(f"=== WORKER INICIADO (intervalo: {interval}s) ===")
         logger.info(f"Iniciando background worker (intervalo: {interval}s)")
-        
+
         while True:
             try:
+                print(f"=== WORKER CHAMANDO API: {api_url} ===")
                 response = requests.post(api_url, timeout=30)
                 if response.status_code == 200:
                     result = response.json()
                     processed = result.get("processed", 0)
+                    print(f"=== WORKER: {processed} PDFs processados ===")
                     if processed > 0:
                         logger.info(f"Worker: {processed} PDFs processados")
+                else:
+                    print(f"=== WORKER: API retornou status {response.status_code} ===")
                 time.sleep(interval)
             except Exception as exc:
+                print(f"=== WORKER ERROR: {exc} ===")
                 logger.error(f"Worker error: {exc}")
                 time.sleep(interval)
-    
+
+    print("=== CRIANDO THREAD DO WORKER ===")
     worker_thread = threading.Thread(target=run_worker, daemon=True)
     worker_thread.start()
-    print("Background worker iniciado como thread daemon")
+    print("=== BACKGROUND WORKER INICIADO COMO THREAD DAEMON ===")
 
 
 extractor = PDFExtractor()
