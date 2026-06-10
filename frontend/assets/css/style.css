@@ -1146,3 +1146,168 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVO — MOBILE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+
+  /* ── Layout: empilha sidebar em cima do main ── */
+  .layout {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  /* ── Sidebar vira barra de navegação horizontal no topo ── */
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0 12px;
+    height: 52px;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    padding: 0 12px 0 0;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    height: 52px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+  }
+
+  .logo-dot { width: 7px; height: 7px; }
+
+  .nav {
+    display: flex;
+    flex-direction: row;
+    padding: 0 12px;
+    flex: 1;
+    gap: 4px;
+  }
+
+  .nav-item {
+    padding: 6px 12px;
+    border-left: none;
+    border-bottom: 2px solid transparent;
+    font-size: 12px;
+    height: 52px;
+    border-radius: 0;
+  }
+
+  .nav-item.active {
+    border-left-color: transparent;
+    border-bottom-color: var(--accent);
+    background: transparent;
+  }
+
+  .sidebar-footer { display: none; }
+
+  /* ── Main: remove overflow hidden e ajusta padding ── */
+  .main {
+    overflow-y: visible;
+    padding: 1.25rem 1rem;
+  }
+
+  /* ── Stats: uma coluna no mobile ── */
+  .stats-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .stat-card { padding: 0.9rem 1rem; }
+
+  .stat-value { font-size: 22px; }
+
+  /* ── Controls: busca ocupa linha inteira, select + botão embaixo ── */
+  .controls {
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    flex: 1 1 100%;
+  }
+
+  .filter-wrap {
+    flex: 1;
+  }
+
+  .filter-wrap select {
+    width: 100%;
+  }
+
+  .refresh-btn {
+    flex-shrink: 0;
+  }
+
+  /* ── Filtro por vaga: botão ocupa largura total ── */
+  .vaga-toggle-btn {
+    width: 100%;
+  }
+
+  /* ── Linha de candidato: esconde skills no mobile para não poluir ── */
+  .row-skills {
+    display: none;
+  }
+
+  /* ── Paginação: centraliza e reduz tamanho dos botões ── */
+  .page-btn {
+    min-width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  /* ── Modal: ocupa quase a tela toda ── */
+  .modal {
+    max-width: 100%;
+    margin: 0.5rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  /* ── Modal campos: empilha numa coluna ── */
+  .modal-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Selecionados: empilha as colunas ── */
+  .selected-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* ── Card selecionado: ajusta layout interno ── */
+  .selected-card {
+    flex-wrap: wrap;
+  }
+
+  .selected-card-right {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* ── Confirm box ── */
+  .confirm-box {
+    margin: 0.75rem;
+  }
+}
+
+/* ── Telas muito pequenas (< 380px) ── */
+@media (max-width: 380px) {
+  .logo span,
+  .logo-text { display: none; }
+
+  .nav-item span { display: none; }
+
+  .nav-item i { font-size: 20px; }
+
+  .main { padding: 1rem 0.75rem; }
+}
