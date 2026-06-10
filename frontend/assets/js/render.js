@@ -71,11 +71,80 @@ function renderRow(candidate) {
 
 function render(list) {
   const el = document.getElementById("list");
+
   if (list.length === 0) {
     el.innerHTML = '<div class="empty">Nenhum candidato encontrado.</div>';
+    renderPagination(0, 0);
     return;
   }
-  el.innerHTML = list.map(c => renderRow(c)).join("");
+
+  const totalPages = Math.ceil(list.length / PAGE_SIZE);
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const page  = list.slice(start, start + PAGE_SIZE);
+
+  el.innerHTML = page.map(c => renderRow(c)).join("");
+  renderPagination(list.length, totalPages);
+}
+
+function renderPagination(total, totalPages) {
+  const el = document.getElementById("pagination");
+  if (!el) return;
+
+  if (totalPages <= 1) {
+    el.innerHTML = "";
+    return;
+  }
+
+  const prev = `<button class="page-btn" ${currentPage === 1 ? "disabled" : ""} onclick="goToPage(${currentPage - 1})">
+    <i class="ti ti-chevron-left"></i>
+  </button>`;
+
+  const next = `<button class="page-btn" ${currentPage === totalPages ? "disabled" : ""} onclick="goToPage(${currentPage + 1})">
+    <i class="ti ti-chevron-right"></i>
+  </button>`;
+
+  // Gera os botões de página com reticências
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+      pages.push(`<button class="page-btn ${i === currentPage ? 'page-btn--active' : ''}" onclick="goToPage(${i})">${i}</button>`);
+    } else if (pages[pages.length - 1] !== '<span class="page-ellipsis">…</span>') {
+      pages.push('<span class="page-ellipsis">…</span>');
+    }
+  }
+
+  const info = `<span class="page-info">${total} candidatos</span>`;
+
+  el.innerHTML = `${info}${prev}${pages.join("")}${next}`;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  // Reroda go() sem resetar a página
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const sort  = document.getElementById("sortSelect").value;
+
+  let list = candidates.filter(c => {
+    const skills = c.skills || [];
+    return (
+      (c.full_name || "").toLowerCase().includes(query) ||
+      (c.email     || "").toLowerCase().includes(query) ||
+      skills.some(s => s.toLowerCase().includes(query))
+    ) && matchesVaga(c, activeVaga);
+  });
+
+  if (sort === "asc") {
+    list = [...list].sort((a, b) => b.final_score - a.final_score);
+  } else if (sort === "desc") {
+    list = [...list].sort((a, b) => a.final_score - b.final_score);
+  } else {
+    list = [...list].sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "", "pt"));
+  }
+
+  render(list);
+  document.getElementById("list").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 // ── Página de Selecionados ────────────────────────────────────────────────────
