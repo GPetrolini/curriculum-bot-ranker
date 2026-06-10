@@ -74,12 +74,11 @@ services:
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - BACKGROUND_WORKER_INTERVAL=${BACKGROUND_WORKER_INTERVAL:-30}
+      - API_URL=https://curriculum-bot-ranker.onrender.com/process
     volumes:
       - ./src:/app/src
       - ./.env:/app/.env
       - ./background_worker.py:/app/background_worker.py
-    depends_on:
-      - backend
     command: python background_worker.py
 
   airflow-webserver:

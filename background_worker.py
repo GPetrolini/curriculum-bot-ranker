@@ -1,11 +1,12 @@
 import time
 import logging
 import requests
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-API_URL = "http://backend:8000/process"
+API_URL = os.getenv("API_URL", "http://localhost:8000/process")
 
 
 def trigger_processing() -> dict:
