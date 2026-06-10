@@ -1,0 +1,257 @@
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Design Tokens ── */
+:root {
+  --bg:          #0b0b0f;
+  --surface:     #111116;
+  --surface2:    #18181f;
+  --border:      #1f1f2b;
+  --border2:     #2a2a3a;
+
+  --accent:      #7c6af7;
+  --accent-dim:  #2e2a5a;
+
+  --text:        #e2e0ff;
+  --text-2:      #7a788f;
+  --text-3:      #3a3850;
+
+  --green-bg:    #162519;
+  --green-text:  #6dbf7e;
+  --green-bd:    #2d5c30;
+
+  --blue-bg:     #0f1e2e;
+  --blue-text:   #5aaaf5;
+  --blue-bd:     #1e4a7a;
+
+  --amber-bg:    #231e10;
+  --amber-text:  #c9a84c;
+  --amber-bd:    #574f22;
+
+  --yellow-bg:   #231f08;
+  --yellow-text: #e0c040;
+  --yellow-bd:   #5a5010;
+
+  --purple-bg:   #1e1630;
+  --purple-text: #a88ee8;
+  --purple-bd:   #4a3572;
+
+  --font:        'Geist', system-ui, sans-serif;
+  --mono:        'Geist Mono', monospace;
+
+  --radius-sm:   6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+}
+
+/* ── Base ── */
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ── */
+header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+/* ── Layout ── */
+.layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 16px;
+  padding: 20px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── Panel ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.panel h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* ── Status Box ── */
+.status-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-box {
+  background: var(--surface2);
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  width: 100%;
+}
+
+.status-box strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--mono);
+}
+
+#statusLabel {
+  font-size: 13px;
+  color: var(--text);
+}
+
+/* ── Log Wrapper ── */
+.log-wrapper {
+  height: 360px;
+  overflow-y: auto;
+  padding: 12px;
+  background: var(--surface2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  margin-top: 16px;
+}
+
+.log-wrapper::-webkit-scrollbar { width: 4px; }
+.log-wrapper::-webkit-scrollbar-track { background: transparent; }
+.log-wrapper::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.log-line {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-bottom: 6px;
+  white-space: pre-wrap;
+  color: var(--text-2);
+  font-family: var(--mono);
+}
+
+.log-line.warn {
+  color: var(--amber-text);
+}
+
+.log-line.error {
+  color: #ff7373;
+}
+
+/* ── Table ── */
+.panel table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.panel table th,
+.panel table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.panel table th {
+  color: var(--text-3);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
+.panel table tr:hover {
+  background: var(--surface2);
+}
+
+.panel table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.controls button,
+.controls input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface2);
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.controls button {
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.controls button:hover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.controls input {
+  flex: 1;
+}
+
+.controls input::placeholder {
+  color: var(--text-3);
+}
+
+.controls input:focus {
+  border-color: var(--accent);
+}
+
+/* ── Empty State ── */
+.empty {
+  color: var(--text-3);
+  text-align: center;
+  padding: 2rem;
+  font-size: 13px;
+}
+
+/* ── Footer ── */
+footer {
+  padding: 16px 24px 24px;
+  font-size: 12px;
+  color: var(--text-3);
+  text-align: center;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}

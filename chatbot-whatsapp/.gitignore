@@ -1,0 +1,9 @@
+node_modules
+pdf_downloads/
+pdf_metadata.log
+.wwebjs_auth/
+.wwebjs_cache/
+tokens/
+erros.txt
+.env
+dist/

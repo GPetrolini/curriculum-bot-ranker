@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp PDF Scanner</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>WhatsApp PDF Scanner</h1>
+    </header>
+
+    <div class="layout">
+      <section class="panel">
+        <h2>Status</h2>
+        <div class="status-box">
+          <strong>Status da conexão:</strong>
+          <span id="statusLabel">Aguardando inicialização...</span>
+        </div>
+
+        <h2 style="margin-top:24px;">Logs</h2>
+        <div class="log-wrapper" id="logContainer"></div>
+      </section>
+
+      <section class="panel">
+        <div class="status-row">
+          <div class="status-box" style="flex: 1;">
+            <strong>Lista de PDFs</strong>
+            <div class="controls">
+              <button id="refreshButton" type="button">Atualizar lista</button>
+              <button id="openFolderButton" type="button">Abrir pasta</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="controls">
+            <input id="scanCountInput" type="number" min="1" value="10" placeholder="Últimas conversas" />
+            <button id="scanChatsButton" type="button">Escanear conversas</button>
+          </div>
+          <div class="controls" style="margin-top:12px;">
+            <button id="uploadToDbButton" type="button" style="flex: 1;">Upload para Banco de Dados</button>
+          </div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Nome</th>
+              <th>Tamanho</th>
+              <th>Atualizado</th>
+            </tr>
+          </thead>
+          <tbody id="pdfListBody"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <footer>
+      Use esta UI para escanear o QR code, ver os PDFs recebidos e disparar o envio para a API do banco.
+    </footer>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
