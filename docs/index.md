@@ -9,6 +9,7 @@
 - `Banco de Dados` — modelos SQLAlchemy e repositório.
 - `Pipeline` — fluxos e diagramas.
 - `ChatBot WhatsApp` — bot de WhatsApp para download automático de currículos.
+- `Testes` — testes unitários e BDD do sistema.
 
 ## Como navegar
 

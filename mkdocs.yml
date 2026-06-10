@@ -14,6 +14,10 @@ nav:
       - Overview: database/index.md
   - Pipeline:
       - Overview: pipeline/index.md
+  - Testes:
+      - Overview: tests/index.md
+      - Unitários: tests/unit.md
+      - Integração: tests/integration.md
 theme:
   name: material
   palette:
