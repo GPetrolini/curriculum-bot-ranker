@@ -143,48 +143,54 @@ def process_pdf_from_db(raw_resume: RawResumeModel, vacancy: VacancyModel, sessi
 
 
 def process_assets() -> dict:
-    init_db()
+    try:
+        init_db()
 
-    processed_ids: List[str] = []
-    with SessionLocal() as session:
-        vacancy = get_or_create_vacancy(session)
+        processed_ids: List[str] = []
+        with SessionLocal() as session:
+            vacancy = get_or_create_vacancy(session)
 
-        raw_resumes = session.query(RawResumeModel).all()
+            raw_resumes = session.query(RawResumeModel).filter(
+                RawResumeModel.status == "pending"
+            ).all()
 
-        print(f"Encontrados {len(raw_resumes)} PDFs na tabela raw_resumes")
+            print(f"Encontrados {len(raw_resumes)} PDFs pendentes na tabela raw_resumes")
 
-        if not raw_resumes:
-            return {"processed": 0, "message": "Nenhum PDF encontrado na tabela raw_resumes"}
+            if not raw_resumes:
+                return {"processed": 0, "message": "Nenhum PDF pendente encontrado na tabela raw_resumes"}
 
-        for raw_resume in raw_resumes:
-            print(f"Processando: {raw_resume.file_name}")
-            existing = CandidateRepository.get_by_file_name(session, raw_resume.file_name)
-            if existing:
-                print(f"Já existe candidato para {raw_resume.file_name}, marcando como processado...")
-                raw_resume.status = "processed"
-                raw_resume.processed_at = datetime.utcnow()
-                session.commit()
-                continue
+            for raw_resume in raw_resumes:
+                print(f"Processando: {raw_resume.file_name}")
+                existing = CandidateRepository.get_by_file_name(session, raw_resume.file_name)
+                if existing:
+                    print(f"Já existe candidato para {raw_resume.file_name}, marcando como processado...")
+                    raw_resume.status = "processed"
+                    raw_resume.processed_at = datetime.utcnow()
+                    session.commit()
+                    continue
 
-            try:
-                candidate = process_pdf_from_db(raw_resume, vacancy, session)
-                raw_resume.status = "processed"
-                raw_resume.processed_at = datetime.utcnow()
-                session.commit()
-                processed_ids.append(str(candidate.id))
-                print(f"Sucesso: {raw_resume.file_name}")
-            except SQLAlchemyError as exc:
-                raw_resume.status = "error"
-                session.commit()
-                raise RuntimeError(
-                    f"Falha ao salvar candidato para {raw_resume.file_name}: {exc}"
-                ) from exc
-            except Exception as exc:
-                raw_resume.status = "error"
-                session.commit()
-                print(f"Falha no processamento de {raw_resume.file_name}: {exc}")
+                try:
+                    candidate = process_pdf_from_db(raw_resume, vacancy, session)
+                    raw_resume.status = "processed"
+                    raw_resume.processed_at = datetime.utcnow()
+                    session.commit()
+                    processed_ids.append(str(candidate.id))
+                    print(f"Sucesso: {raw_resume.file_name}")
+                except SQLAlchemyError as exc:
+                    session.rollback()
+                    raw_resume.status = "error"
+                    session.commit()
+                    print(f"Falha ao salvar candidato para {raw_resume.file_name}: {exc}")
+                except Exception as exc:
+                    session.rollback()
+                    raw_resume.status = "error"
+                    session.commit()
+                    print(f"Falha no processamento de {raw_resume.file_name}: {exc}")
 
-    return {"processed": len(processed_ids), "candidate_ids": processed_ids}
+        return {"processed": len(processed_ids), "candidate_ids": processed_ids}
+    except Exception as exc:
+        print(f"Erro geral no process_assets: {exc}")
+        raise
 
 
 def print_best_candidates(vacancy_title: str) -> None:
