@@ -14,6 +14,16 @@ nav:
       - Overview: database/index.md
   - Pipeline:
       - Overview: pipeline/index.md
+  - ChatBot WhatsApp:
+      - Overview: chatbot-whatsapp/index.md
+      - Backend:
+          - Overview: chatbot-whatsapp/backend/index.md
+          - API: chatbot-whatsapp/backend/api.md
+          - Database: chatbot-whatsapp/backend/database.md
+      - Frontend:
+          - Overview: chatbot-whatsapp/frontend/index.md
+      - Testes:
+          - Overview: chatbot-whatsapp/tests/index.md
   - Testes:
       - Overview: tests/index.md
       - Unitários: tests/unit.md
