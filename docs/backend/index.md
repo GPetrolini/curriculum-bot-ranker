@@ -15,14 +15,14 @@
 
 ```mermaid
 graph LR
-    A[Bot WhatsApp] -->|Upload PDF| B[(PostgreSQL<br/>raw_resumes)]
+    A[Bot WhatsApp] -->|Upload PDF| B[(PostgreSQL Neon<br/>raw_resumes)]
     B -->|POST /process| C[FastAPI<br/>PDFExtractor]
     C -->|cleaned_text| D[KeywordAnalyzer]
     D -->|scores| E[RankingEngine]
-    E -->|candidate| F[(PostgreSQL<br/>candidates)]
+    E -->|candidate| F[(PostgreSQL Neon<br/>candidates)]
     F -->|POST /resume/analyze-missing| G[ResumeService]
     G -->|extracted_text| H[OpenAI]
-    H -->|ai_analysis| I[(PostgreSQL<br/>candidates atualizados)]
+    H -->|ai_analysis| I[(PostgreSQL Neon<br/>candidates atualizados)]
 
     style B fill:#336791,stroke:#fff,stroke-width:2px,color:#fff
     style F fill:#336791,stroke:#fff,stroke-width:2px,color:#fff

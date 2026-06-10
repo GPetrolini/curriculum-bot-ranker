@@ -6,7 +6,7 @@
 
 - `Backend` — rotas, serviços e integrações.
 - `Frontend` — seção dedicada, atualmente sem código implementado.
-- `Banco de Dados` — modelos SQLAlchemy e repositório.
+- `Banco de Dados` — modelos SQLAlchemy e repositório (PostgreSQL Neon).
 - `Pipeline` — fluxos e diagramas.
 - `ChatBot WhatsApp` — bot de WhatsApp para download automático de currículos.
 - `Testes` — testes unitários e BDD do sistema.
@@ -62,12 +62,13 @@ Descrição breve de diretórios:
 
 # Observações Técnicas
 
-- Dependências críticas: `fastapi`, `uvicorn`, `sqlalchemy`, `python-dotenv`, `PyMuPDF (fitz)`, `openai`.
+- Dependências críticas: `fastapi`, `uvicorn`, `sqlalchemy`, `python-dotenv`, `PyMuPDF (fitz)`, `openai`, `apache-airflow`.
 - Arquivo de configuração: `src/config/settings.py` (variáveis esperadas):
-  - `DATABASE_URL` (ex: postgresql://...)
+  - `DATABASE_URL` (ex: postgresql://neondb_owner:YOUR_PASSWORD@ep-polished-cake-ac4gqqx2-pooler.sa-east-1.aws.neon.tech/neondb)
   - `ASSETS_PATH` (pasta de PDFs)
   - `VACANCY_TITLE`, `VACANCY_DESCRIPTION`, `VACANCY_SENIORITY`, `VACANCY_DEPARTMENT`, `VACANCY_STATUS`
   - `OPENAI_API_KEY`
+  - `GCP_PROJECT_ID` (para integração com Google Cloud)
 - Entradas de runtime importantes: pasta `assets/` contém PDFs de exemplo.
 - Docker: existem `Dockerfile` e `Dockerfile.backend`. Para rodar o backend no container use `Dockerfile.backend` conforme `README.md`.
 
@@ -80,7 +81,7 @@ Pontos de atenção:
 
 # Resumo Executivo
 
-O sistema extrai currículos em PDF, normaliza o texto, realiza uma análise por palavras-chave para calcular um score e aplica uma regra simples de ranking. A integração com OpenAI gera resumos e extração de skills/seniority quando solicitada; existe uma rotina para processar apenas os candidatos sem resumo de IA. A persistência é feita via SQLAlchemy em PostgreSQL. A API principal expõe rotas para processar arquivos, listar candidatos e disparar análises de IA em lote ou individuais.
+O sistema extrai currículos em PDF, normaliza o texto, realiza uma análise por palavras-chave para calcular um score e aplica uma regra simples de ranking. A integração com OpenAI gera resumos e extração de skills/seniority quando solicitada; existe uma rotina para processar apenas os candidatos sem resumo de IA. A persistência é feita via SQLAlchemy em PostgreSQL Neon. A API principal expõe rotas para processar arquivos, listar candidatos e disparar análises de IA em lote ou individuais. O Apache Airflow orquestra o pipeline ETL para carga de dados no Google Cloud Platform.
 
 ---
 

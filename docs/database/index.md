@@ -4,11 +4,11 @@ Esta seção descreve a infraestrutura na nuvem, o gerenciamento de migrações 
 
 ---
 
-## 1. Infraestrutura Cloud e Migrations (PostgreSQL)
+## 1. Infraestrutura Cloud e Migrations (PostgreSQL Neon)
 
 Nosso banco de dados foi projetado para ser relacional, rápido e escalável, atendendo tanto o fluxo de inserção do Bot via WhatsApp quanto o processamento de IA do Backend.
 
-* **Neon.tech (PostgreSQL Serverless):** Permite acesso remoto de toda a equipe na mesma base de dados.
+* **Neon.tech (PostgreSQL Serverless):** Permite acesso remoto de toda a equipe na mesma base de dados. Usamos Neon para produção.
 * **Alembic:** Gerencia o versionamento do esquema (migrations). O arquivo `env.py` foi blindado para injetar credenciais via variáveis de ambiente (`.env`), garantindo a segurança no repositório.
 
 ### Fluxo de Inserção do Bot
@@ -18,12 +18,12 @@ Criamos a tabela `raw_resumes` para atuar como uma "caixa de entrada". O bot env
 ```mermaid
 sequenceDiagram
     participant Bot as Bot (WhatsApp)
-    participant RawDB as PostgreSQL (raw_resumes)
+    participant RawDB as PostgreSQL Neon (raw_resumes)
     participant API as FastAPI
     participant Extractor as PDFExtractor
     participant Analyzer as KeywordAnalyzer
     participant Ranker as RankingEngine
-    participant CandDB as PostgreSQL (candidates)
+    participant CandDB as PostgreSQL Neon (candidates)
 
     Bot->>RawDB: INSERT PDF (file_content, file_name, status='pending')
     API->>RawDB: POST /process
