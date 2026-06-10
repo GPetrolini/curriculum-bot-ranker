@@ -77,8 +77,12 @@
           </select>
           <i class="ti ti-chevron-down chevron-icon"></i>
         </div>
+        <button class="refresh-btn" id="refreshBtn" onclick="fetchCandidates()">
+          <i class="ti ti-refresh refresh-btn__icon"></i>
+          <span class="refresh-label">Atualizar</span>
+        </button>
       </div>
-
+      
       <!-- Filtro por vaga (colapsável) -->
       <div class="vaga-toggle-wrap">
         <button class="vaga-toggle-btn" id="vagaToggleBtn" onclick="toggleVagas()">
