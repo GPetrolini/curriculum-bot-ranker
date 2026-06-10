@@ -11,6 +11,7 @@ fastapi
 uvicorn
 pydantic
 python-multipart
+requests
 
 SQLAlchemy
 alembic

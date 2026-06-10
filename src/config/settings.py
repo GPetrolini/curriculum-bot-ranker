@@ -21,6 +21,7 @@ class Settings:
     VACANCY_DEPARTMENT: str = os.getenv("VACANCY_DEPARTMENT", "Engenharia")
     VACANCY_STATUS: str = os.getenv("VACANCY_STATUS", "active")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    BACKGROUND_WORKER_INTERVAL: int = int(os.getenv("BACKGROUND_WORKER_INTERVAL", "30"))
 
 
 settings = Settings()
