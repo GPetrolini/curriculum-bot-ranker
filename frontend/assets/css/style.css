@@ -24,9 +24,17 @@
   --green-text:  #6dbf7e;
   --green-bd:    #2d5c30;
 
+  --blue-bg:     #0f1e2e;
+  --blue-text:   #5aaaf5;
+  --blue-bd:     #1e4a7a;
+
   --amber-bg:    #231e10;
   --amber-text:  #c9a84c;
   --amber-bd:    #574f22;
+
+  --yellow-bg:   #231f08;
+  --yellow-text: #e0c040;
+  --yellow-bd:   #5a5010;
 
   --purple-bg:   #1e1630;
   --purple-text: #a88ee8;
@@ -398,9 +406,9 @@ html, body {
   font-family: var(--mono);
 }
 
-.badge-high   { background: var(--green-bg);  color: var(--green-text);  border: 1px solid var(--green-bd); }
-.badge-mid    { background: var(--amber-bg);  color: var(--amber-text);  border: 1px solid var(--amber-bd); }
-.badge-low    { background: var(--purple-bg); color: var(--purple-text); border: 1px solid var(--purple-bd); }
+.badge-high   { background: var(--green-bg);   color: var(--green-text);   border: 1px solid var(--green-bd); }
+.badge-mid    { background: var(--blue-bg);    color: var(--blue-text);    border: 1px solid var(--blue-bd); }
+.badge-low    { background: var(--yellow-bg);  color: var(--yellow-text);  border: 1px solid var(--yellow-bd); }
 
 /* ── Time ── */
 .tm {
@@ -624,9 +632,9 @@ html, body {
 }
 
 /* pill usa as mesmas variáveis de cor dos badges */
-.score-pill.badge-high { background: var(--green-bg);  border: 1px solid var(--green-bd); }
-.score-pill.badge-mid  { background: var(--amber-bg);  border: 1px solid var(--amber-bd); }
-.score-pill.badge-low  { background: var(--purple-bg); border: 1px solid var(--purple-bd); }
+.score-pill.badge-high { background: var(--green-bg);   border: 1px solid var(--green-bd); }
+.score-pill.badge-mid  { background: var(--blue-bg);    border: 1px solid var(--blue-bd); }
+.score-pill.badge-low  { background: var(--yellow-bg);  border: 1px solid var(--yellow-bd); }
 .score-pill.badge-weak { background: #1e1010;          border: 1px solid #5c2020; }
 
 .score-number {
@@ -642,13 +650,13 @@ html, body {
 }
 
 .score-pill.badge-high .score-number { color: var(--green-text); }
-.score-pill.badge-mid  .score-number { color: var(--amber-text); }
-.score-pill.badge-low  .score-number { color: var(--purple-text); }
+.score-pill.badge-mid  .score-number { color: var(--blue-text); }
+.score-pill.badge-low  .score-number { color: var(--yellow-text); }
 .score-pill.badge-weak .score-number { color: #e07070; }
 
 .score-pill.badge-high .score-sep { color: var(--green-text); }
-.score-pill.badge-mid  .score-sep { color: var(--amber-text); }
-.score-pill.badge-low  .score-sep { color: var(--purple-text); }
+.score-pill.badge-mid  .score-sep { color: var(--blue-text); }
+.score-pill.badge-low  .score-sep { color: var(--yellow-text); }
 .score-pill.badge-weak .score-sep { color: #e07070; }
 
 .score-label {
@@ -659,8 +667,8 @@ html, body {
 }
 
 .badge-high-text  { color: var(--green-text); }
-.badge-mid-text   { color: var(--amber-text); }
-.badge-low-text   { color: var(--purple-text); }
+.badge-mid-text   { color: var(--blue-text); }
+.badge-low-text   { color: var(--yellow-text); }
 .badge-weak-text  { color: #e07070; }
 
 /* remove o estilo antigo de row-meta que não é mais usado */
@@ -1017,5 +1025,19 @@ html, body {
   background: var(--accent-dim);
   border-color: var(--accent);
   color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Botão ícone (entrevista compacto) ───────────────────────────────────────*/
+.action-btn--icon {
+  padding: 6px 8px;
+  font-size: 16px;
+}
+
+/* ── Skill +N badge ──────────────────────────────────────────────────────────*/
+.row-skill--more {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: rgba(124, 106, 247, 0.35);
   font-weight: 500;
 }
