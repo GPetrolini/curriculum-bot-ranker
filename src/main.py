@@ -32,6 +32,15 @@ app.include_router(candidate_router, prefix="/candidates", tags=["candidates"])
 @app.on_event("startup")
 def startup_event() -> None:
     Base.metadata.create_all(bind=engine)
+    # Rodar migrações pendentes
+    try:
+        from alembic.config import Config
+        from alembic import command
+        
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+    except Exception as e:
+        print(f"Aviso: Não foi possível rodar migrações automaticamente: {e}")
 
 
 extractor = PDFExtractor()
