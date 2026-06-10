@@ -58,7 +58,7 @@ def startup_event() -> None:
         logger.info(f"Iniciando background worker (intervalo: {interval}s)")
 
         # Delay inicial para garantir que a API esteja pronta
-        print("=== WORKER: AGUARDANDO 10 SEGUNDOS PARA API SUBIR ===")
+        print("=== WORKER: AGUARDANDO 20 SEGUNDOS PARA API SUBIR ===")
         time.sleep(20)
 
         while True:
