@@ -15,22 +15,63 @@
 
 > Ferramenta automatizada de leitura, estruturação e ranqueamento de currículos impulsionada por Inteligência Artificial (LLMs).
 
- **Status:** *Este projeto está em fase ativa de desenvolvimento. A infraestrutura de dados, modelagem do banco e orquestração de IA já estão operantes. As integrações finais entre microserviços e a interface (Frontend) estão em andamento.*
+**Status:** *Este projeto está em fase ativa de desenvolvimento. A infraestrutura de dados, modelagem do banco e orquestração de IA já estão operantes. As integrações finais entre microserviços e a interface (Frontend) estão em andamento.*
 
 ---
 
 ## Sobre o Projeto
+
 Projeto desenvolvido para a Unidade Curricular de **Gestão de Qualidade de Software** do curso de Análise e Desenvolvimento de Sistemas.
 
 * **Instituição:** UNISUL - Florianópolis, SC.
 * **Professor:** Prof. Dr. Saulo Popov Zambiasi
 
-**Equipe de Desenvolvimento:**
+### Equipe de Desenvolvimento
+
 * **Gustavo Petrolini** (10724112917) - Engenharia de Dados / Cloud / Banco de Dados
 * **Gustavo Perino** (1072412639) - Backend & IA
 * **Leonardo Vivan** (1072416471) - Frontend
 * **Tiago Machado** (1072410017) - Frontend 
-* **Natã Batista** (1072415016) - Integração IA / Pipeline BDD
+* **Natã Batista** (1072415016) - Backend & Integração IA / Pipeline BDD
+
+---
+
+## Módulos do Monorepo
+
+O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em seu respectivo escopo técnico:
+
+### 1. Engenharia de Dados (Gustavo Petrolini)
+* **Tecnologias:** Python, Apache Airflow, Docker, Google Cloud Storage, PostgreSQL (Neon).
+* **Status Atual:**
+  * Infraestrutura de orquestração local via Docker Compose (Webserver, Scheduler).
+  * Criação do Pipeline de Ingestão (DAGs) conectando dados brutos locais ao Data Lake no GCP.
+  * Injeção de credenciais de nuvem automatizada via variáveis de ambiente.
+  * Banco PostgreSQL Neon configurado para produção.
+
+### 2. Backend & IA (Gustavo Perino / Natã Batista)
+* **Tecnologias:** Python, FastAPI, OpenAI, SQLAlchemy, Docker, PostgreSQL (Neon).
+* **Status Atual:**
+  * API FastAPI implementada com rotas de análise e consulta de candidatos.
+  * Integração com OpenAI para gerar resumo de currículo, seniority e skills a partir do texto armazenado no banco.
+  * Serviço Docker dedicado `backend` disponível em `docker-compose.yaml`.
+  * Suporte a variáveis de ambiente via `.env` para `DATABASE_URL`, `OPENAI_API_KEY` e demais credenciais.
+  * Conexão com banco PostgreSQL Neon para produção.
+
+### 3. Frontend (Leonardo Vivan & Tiago Machado)
+* **Tecnologias:** HTML5, CSS3, Vanilla JavaScript.
+* **Status Atual:**
+  * Estrutura base da interface criada (HTML).
+  * Estilização em progresso via CSS.
+  * Lógica de consumo da API (Javascript) em fase de integração.
+
+### 4. ChatBot WhatsApp (Natã Batista)
+* **Tecnologias:** Node.js, Electron, whatsapp-web.js, PostgreSQL.
+* **Status Atual:**
+  * Bot de WhatsApp para download automático de currículos em PDF.
+  * Interface Electron desktop para monitoramento e controle.
+  * Integração com banco PostgreSQL para armazenamento de metadados.
+  * Filtro inteligente de currículos por nome de arquivo.
+  * Documentação completa em `docs/chatbot-whatsapp/`.
 
 ---
 
@@ -39,15 +80,13 @@ Projeto desenvolvido para a Unidade Curricular de **Gestão de Qualidade de Soft
 O **CV Ranker** visa acelerar o processo de triagem em processos seletivos, reduzindo drasticamente o tempo de leitura humana e padronizando a avaliação dos candidatos de forma técnica e imparcial.
 
 ### O Fluxo de Dados e Processamento:
-1. **Ingestão:** O currículo (PDF) chega através do bot e é armazenado de forma segura, acionando a API.
+1. **Ingestão:** O currículo (PDF) chega através do **ChatBot WhatsApp** ou upload manual e é armazenado de forma segura, acionando a API.
 2. **Extração & Score:** O Backend extrai o texto do PDF e o analisa através de um motor de pontuação (Score), buscando as habilidades obrigatórias (`must_have`) e desejáveis (`nice_to_have`).
 3. **Análise Semântica (IA):** Integração com **OpenAI** para leitura humana avançada, gerando um resumo profissional e definindo a senioridade do candidato.
 4. **Armazenamento:** Persistência dos dados estruturados e notas em um banco **PostgreSQL (Neon)**.
-5. **Analytics:** O **Apache Airflow** extrai os dados processados e realiza a carga (ELT) no Data Lake/Data Warehouse (**Google Cloud Platform**) para geração de dashboards e métricas do RH.
+5. **Analytics:** O **Apache Airflow** orquestra o pipeline ETL, extrai os dados processados e realiza a carga no Data Lake/Data Warehouse (**Google Cloud Platform**) para geração de dashboards e métricas do RH.
 
----
-
-## Algoritmo de Ranqueamento
+### Algoritmo de Ranqueamento
 
 O motor de *ranking* avalia a compatibilidade do candidato com a vaga seguindo esta régua de notas (Score):
 
@@ -58,31 +97,16 @@ O motor de *ranking* avalia a compatibilidade do candidato com a vaga seguindo e
 
 ---
 
-## Módulos do Monorepo
+## Branches do Repositório
 
-O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em seu respectivo escopo técnico:
+O projeto utiliza um fluxo de trabalho baseado em branches para organizar o desenvolvimento:
 
-### 1. Engenharia de Dados (Gustavo Petrolini)
-* **Tecnologias:** Python, Apache Airflow, Docker, Google Cloud Storage, PostgreSQL.
-* **Status Atual:**
-  * Infraestrutura de orquestração local via Docker Compose (Webserver, Scheduler).
-  * Criação do Pipeline de Ingestão (DAGs) conectando dados brutos locais ao Data Lake no GCP.
-  * Injeção de credenciais de nuvem automatizada via variáveis de ambiente.
+- **main** - Branch principal estável. Contém código pronto para produção.
+- **develop** - Branch de desenvolvimento. Integra features antes de ir para main.
+- **feature/*** - Branches para desenvolvimento de novas funcionalidades específicas.
+- **chatbot-whatsapp** - Branch dedicada ao desenvolvimento do ChatBot WhatsApp.
 
-### 2. Backend & IA (Gustavo Perino / Natã Batista)
-* **Tecnologias:** Python, FastAPI, OpenAI / Google Gemini, SQLAlchemy, Docker.
-* **Status Atual:**
-  * API FastAPI implementada com rotas de análise e consulta de candidatos.
-  * Integração com OpenAI para gerar resumo de currículo, seniority e skills a partir do texto armazenado no banco.
-  * Serviço Docker dedicado `backend` disponível em `docker-compose.yaml`.
-  * Suporte a variáveis de ambiente via `.env` para `DATABASE_URL`, `OPENAI_API_KEY` e demais credenciais.
-
-### 3. Frontend (Leonardo Vivan & Tiago Machado)
-* **Tecnologias:** HTML5, CSS3, Vanilla JavaScript.
-* **Status Atual:**
-  * Estrutura base da interface criada (HTML).
-  * Estilização em progresso via CSS.
-  * Lógica de consumo da API (Javascript) em fase de integração.
+O fluxo padrão é: desenvolver em branches `feature/*`, fazer merge para `develop`, e depois fazer merge de `develop` para `main` após aprovação.
 
 ---
 
@@ -90,44 +114,43 @@ O repositório abriga todas as frentes do projeto. Cada desenvolvedor atua em se
 
 ### Pré-requisitos
 * `Docker` e `Docker Compose` instalados.
-* Uma conta no GCP (Google Cloud) e chaves de API (OpenAI/Gemini).
+* Uma conta no GCP (Google Cloud) e chave da API OpenAI.
+* Python 3.11+ (para execução local sem Docker).
 
 ### 1. Clonar o Repositório
-```
-git clone [https://github.com/GPetrolini/curriculum-bot-ranker.git](https://github.com/GPetrolini/curriculum-bot-ranker.git)
+```bash
+git clone https://github.com/GPetrolini/curriculum-bot-ranker.git
 cd curriculum-bot-ranker
 ```
 
-## 2. Configuração de Variáveis:
+### 2. Configuração de Variáveis
 Crie uma cópia do `.env.example` e renomeie para `.env`.
 
-```
+```bash
 cp .env.example .env
 ```
 
-Preencha o `.env` com as credenciais do GCP e demais chaves da aplicação.
+Preencha o `.env` com as credenciais do GCP e demais chaves da aplicação:
+- `DATABASE_URL` - URL de conexão com PostgreSQL Neon
+- `OPENAI_API_KEY` - Chave da API OpenAI
+- `GCP_PROJECT_ID` - ID do projeto Google Cloud
+- `ASSETS_PATH` - Caminho para pasta de PDFs
+- `VACANCY_TITLE`, `VACANCY_DESCRIPTION`, `VACANCY_SENIORITY`, `VACANCY_DEPARTMENT`, `VACANCY_STATUS` - Dados da vaga
 
-## 3. Suba a Infraestrutura:
-
-```
-docker compose up -d
-```
-
-Airflow UI: `http://localhost:8080`
-
-## 4. Backend FastAPI via Docker
-O backend FastAPI tem um container próprio. Em execução local via Docker/compose ele expõe a API em `http://localhost:8000` por padrão (quando executado isoladamente com o Dockerfile/backend ou mapeado para a porta 8000).
-
-Para subir apenas o backend:
-
-```bash
-docker compose up -d backend
-```
+### 3. Subir a Infraestrutura com Docker
 
 Para subir toda a stack (Postgres + backend + Airflow):
 
 ```bash
 docker compose up -d
+```
+
+Airflow UI: `http://localhost:8080`
+
+Para subir apenas o backend:
+
+```bash
+docker compose up -d backend
 ```
 
 Para testar apenas o backend e reconstruir a imagem:
@@ -136,97 +159,154 @@ Para testar apenas o backend e reconstruir a imagem:
 docker compose up --build backend
 ```
 
-### Endpoints disponíveis
-- `POST http://localhost:8000/resume/analyze`
-  - Payload JSON:
+### 4. Executar Localmente (sem Docker)
 
-```json
-{
-  "candidate_id": "93ce286a-954a-4510-8e35-95689376e716"
-}
-```
-  - Executa análise de currículo usando o texto já armazenado no banco e atualiza os campos `ai_summary`, `ai_strengths`, `ai_seniority`.
-- `POST http://localhost:8000/resume/analyze-missing`
-  - Sem body. Varre o banco e gera resumos de IA apenas para candidatos cujo campo `ai_summary` esteja vazio (`null`).
-  - Exemplos:
-
-PowerShell:
-
-```powershell
-Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/resume/analyze-missing -ContentType "application/json"
-```
-
-curl:
+Criar ambiente virtual:
 
 ```bash
-curl -X POST http://127.0.0.1:8000/resume/analyze-missing
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
 ```
-- `GET http://localhost:8000/resume/info?candidate_id=<id>`
-  - Exemplo:
+
+Instalar dependências:
 
 ```bash
-curl "http://localhost:8000/resume/info?candidate_id=93ce286a-954a-4510-8e35-95689376e716"
+pip install -r requirements.txt
 ```
-  - Retorna o resumo, seniority e strengths do candidato já calculados.
 
-# Testes
+Inicializar banco de dados:
+
+```bash
+alembic upgrade head
+```
+
+Executar API:
+
+```bash
+uvicorn src.main:app --reload
+```
+
+API disponível em: `http://localhost:8000`
+
+### 5. ChatBot WhatsApp
+
+O ChatBot WhatsApp é uma aplicação Electron separada. Para executá-lo:
+
+```bash
+cd ChatBot-para-WhatsApp
+npm install
+npm start
+```
+
+Para mais informações sobre o ChatBot WhatsApp, consulte a documentação em `docs/chatbot-whatsapp/`.
+
+---
+
+## Testes
+
 Este projeto usa `pytest` para testes automatizados e também inclui cenários no padrão BDD com `pytest-bdd`.
 
-## O que está coberto
-- Testes unitários em `tests/test_scoring_and_ranking.py`:
-  - valida o cálculo de score em `scoring_service.calculate_score`
-  - testa todos os intervalos de ranking em `RankingEngine.determine_ranking`
-  - verifica a aplicação de ranking em payloads de candidato com `RankingEngine.apply`
-- Testes BDD em `tests/features/scoring_and_ranking.feature` e `tests/test_scoring_and_ranking_bdd.py`:
-  - descrevem o comportamento esperado em cenários Gherkin
-  - confirmam o cálculo de score, a determinação de ranking e a aplicação do ranking no payload
+### O que está coberto
+- **Testes unitários** em `tests/`:
+  - `test_pdf_extractor.py` - Valida extração de texto e informações de contato de PDFs
+  - `test_keyword_analyzer.py` - Testa análise de keywords e cálculo de scores
+  - `test_scoring_and_ranking.py` - Valida o cálculo de score e determinação de ranking
+  - `test_api.py` - Testa os endpoints da API FastAPI
+- **Testes BDD** em `tests/features/`:
+  - `scoring_and_ranking.feature` - Cenários BDD para cálculo de score e ranking
+  - Implementação em `test_scoring_and_ranking_bdd.py`
 
-## Como executar
-Executar apenas os testes de score e ranking:
-```powershell
-.venv\Scripts\Activate.ps1
-pytest -q tests/test_scoring_and_ranking.py
+### Como executar
+Executar todos os testes:
+```bash
+pytest
 ```
 
-Executar todos os testes da pasta `tests`:
-```powershell
-.venv\Scripts\Activate.ps1
-pytest -q tests
+Executar testes com coverage:
+```bash
+pytest --cov=src --cov-report=html
 ```
 
-## Observações
-- A suíte atual já roda com `pytest` e inclui testes unitários e BDD para a lógica de score/ranking.
-- O foco de teste atual é a lógica de score e de determinação de ranking, não a extração de PDF ou a API inteira.
-- O projeto também roda o script principal em CLI para exibir o ranking no terminal, além de persistir candidatos no banco.
-- Se precisar de relatório de cobertura percentual, é possível adicionar `pytest-cov` ao projeto posteriormente.
+Executar testes específicos:
+```bash
+pytest tests/test_keyword_analyzer.py
+pytest tests/test_pdf_extractor.py
+pytest tests/test_scoring_and_ranking.py
+```
 
-# Guia de Contribuição e Versionamento
+### Documentação de Testes
+Para mais informações sobre os testes, consulte a documentação em `docs/tests/`.
+
+### Testes do ChatBot WhatsApp
+O ChatBot WhatsApp usa Jest para testes unitários e Cucumber para testes BDD.
+
+Executar todos os testes do chatbot:
+```bash
+cd ChatBot-para-WhatsApp
+npm test
+```
+
+Executar testes em modo watch:
+```bash
+cd ChatBot-para-WhatsApp
+npm run test:watch
+```
+
+Executar testes com coverage:
+```bash
+cd ChatBot-para-WhatsApp
+npm run test:coverage
+```
+
+Para mais informações sobre os testes do chatbot, consulte a documentação em `docs/chatbot-whatsapp/tests/`.
+
+---
+
+## Documentação
+A documentação técnica do projeto é gerada automaticamente usando **MkDocs** e publicada no **GitHub Pages**.
+
+### Estrutura da Documentação
+- `docs/index.md` - Página principal
+- `docs/backend/` - Documentação do Backend (API, Serviços, Integrações)
+- `docs/frontend/` - Documentação do Frontend
+- `docs/database/` - Documentação do Banco de Dados
+- `docs/pipeline/` - Documentação do Pipeline ETL
+- `docs/chatbot-whatsapp/` - Documentação do ChatBot WhatsApp
+- `docs/tests/` - Documentação de Testes
+
+### Executar Documentação Localmente
+```bash
+pip install -r requirements-docs.txt
+mkdocs serve
+```
+
+Documentação disponível em: `http://127.0.0.1:8000/`
+
+### Deploy Automático
+A documentação é publicada automaticamente no GitHub Pages quando há push para a branch `main` via GitHub Actions. O workflow está configurado em `.github/workflows/deploy-docs.yml`.
+
+---
+
+## Guia de Contribuição e Versionamento
 Este repositório segue práticas rigorosas de CI/CD e revisão de código.
 
 ### Fluxo de Trabalho (GitHub Flow)
-A branch ```main``` é protegida. O desenvolvimento de novas features ocorre em branches isoladas e é integrado via Pull Request (PR).
+A branch `main` é protegida. O desenvolvimento de novas features ocorre em branches isoladas e é integrado via Pull Request (PR).
 
-1. Crie uma branch a partir da ```main``` (```feature/nome-da-tarefa```).
-
+1. Crie uma branch a partir da `main` (`feature/nome-da-tarefa`).
 2. Desenvolva pequenas entregas (Atomic Commits).
-
-3. Abra um PR apontando para a ```main```.
-
+3. Abra um PR apontando para a `main`.
 4. É obrigatória a aprovação (Code Review) de pelo menos 1 membro da equipe antes do Merge.
 
 ### Padrão de Commits (Conventional Commits)
 O histórico deve ser rastreável. Todo commit deve iniciar com um prefixo semântico:
 
-```feat:``` Nova funcionalidade (```feat: adiciona extrator de pdf```)
+- `feat:` Nova funcionalidade (ex: `feat: adiciona extrator de pdf`)
+- `fix:` Correção de bug (ex: `fix: resolve conflito de permissao de volume`)
+- `docs:` Documentação (ex: `docs: atualiza readme com arquitetura`)
+- `refactor:` Alterações que não mudam comportamento (ex: `refactor: reorganiza imports da etl`)
+- `chore:` Manutenção e infraestrutura (ex: `chore: atualiza imagem do airflow`)
 
-```fix```: Correção de bug (```fix: resolve conflito de permissao de volume```)
-
-```docs```: Documentação (```docs: atualiza readme com arquitetura```)
-
-```refactor```: Alterações que não mudam comportamento (```refactor: reorganiza imports da etl```)
-
-```chore```: Manutenção e infraestrutura (```chore: atualiza imagem do airflow```)
-
-
-# Integração Contínua (CI/CD)
-O repositório utiliza GitHub Actions (ou similar configurado) para garantir a integridade da main, barrando merges que quebrem a aplicação ou não passem pelos testes.
+### Integração Contínua (CI/CD)
+O repositório utiliza GitHub Actions para garantir a integridade da main, barrando merges que quebrem a aplicação ou não passem pelos testes. O workflow de deploy da documentação está configurado em `.github/workflows/deploy-docs.yml`.
