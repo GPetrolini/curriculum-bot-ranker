@@ -1098,3 +1098,51 @@ html, body {
   font-size: 12px;
   margin-right: 8px;
 }
+
+/* ── Refresh Button ───────────────────────────────────────────────────────── */
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-2);
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.refresh-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.refresh-btn:hover .refresh-btn__icon {
+  color: var(--accent);
+}
+
+.refresh-btn__icon {
+  font-size: 15px;
+  transition: transform 0.4s ease, color 0.15s;
+}
+
+.refresh-btn--loading {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.refresh-btn--loading .refresh-btn__icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
