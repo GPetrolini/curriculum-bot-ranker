@@ -19,10 +19,10 @@ const avatarColors = [
 // ── Ranking ───────────────────────────────────────────────────────────────────
 
 const RANKING_MAP = {
-  "ÓTIMO":   { badgeClass: "badge-high", label: "Ótimo"   },
-  "BOM":     { badgeClass: "badge-mid",  label: "Bom"     },
-  "REGULAR": { badgeClass: "badge-low",  label: "Regular" },
-  "FRACO":   { badgeClass: "badge-weak", label: "Fraco"   },
+  "EXCELENTE": { badgeClass: "badge-high", label: "Excelente" },
+  "BOM":       { badgeClass: "badge-mid",  label: "Bom"       },
+  "MEDIANO":   { badgeClass: "badge-low",  label: "Mediano"   },
+  "FRACO":     { badgeClass: "badge-weak", label: "Fraco"     },
 };
 
 // ── Vagas ─────────────────────────────────────────────────────────────────────

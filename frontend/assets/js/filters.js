@@ -61,9 +61,9 @@ function go() {
   });
 
   if (sort === "asc") {
-    list = [...list].sort((a, b) => b.final_score - a.final_score);
-  } else if (sort === "desc") {
     list = [...list].sort((a, b) => a.final_score - b.final_score);
+  } else if (sort === "desc") {
+    list = [...list].sort((a, b) => b.final_score - a.final_score);
   } else {
     list = [...list].sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "", "pt"));
   }
