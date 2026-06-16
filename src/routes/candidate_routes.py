@@ -1,9 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import Optional
 
 from database.connection import SessionLocal
 from database.repository import CandidateRepository
+from database.models import CandidateModel
 
 router = APIRouter()
+
+
+class InterviewSelectionUpdate(BaseModel):
+    select_for_interview: Optional[bool] = None
+    interview_select_atc: Optional[bool] = None
 
 
 def serialize_candidate(candidate) -> dict:
@@ -31,6 +39,8 @@ def serialize_candidate(candidate) -> dict:
         "ai_strengths": candidate.ai_strengths,
         "ai_weaknesses": candidate.ai_weaknesses,
         "ai_seniority": candidate.ai_seniority,
+        "select_for_interview": candidate.select_for_interview,
+        "interview_select_atc": candidate.interview_select_atc,
         "skills": [
             skill.strip()
             for skill in (candidate.ai_strengths or "").split(",")
@@ -52,4 +62,29 @@ def list_candidates():
     return {
         "status": "success",
         "candidates": [serialize_candidate(candidate) for candidate in candidates],
+    }
+
+
+@router.put("/{candidate_id}/interview-selection")
+def update_interview_selection(candidate_id: str, update: InterviewSelectionUpdate):
+    with SessionLocal() as session:
+        candidate = session.query(CandidateModel).filter(
+            CandidateModel.id == candidate_id
+        ).first()
+        
+        if not candidate:
+            raise HTTPException(status_code=404, detail="Candidato não encontrado")
+        
+        if update.select_for_interview is not None:
+            candidate.select_for_interview = update.select_for_interview
+        
+        if update.interview_select_atc is not None:
+            candidate.interview_select_atc = update.interview_select_atc
+        
+        session.commit()
+        session.refresh(candidate)
+    
+    return {
+        "status": "success",
+        "candidate": serialize_candidate(candidate)
     }
