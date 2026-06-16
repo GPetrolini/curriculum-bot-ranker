@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, LargeBinary, DateTime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, LargeBinary, DateTime, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -60,6 +60,9 @@ class CandidateModel(Base):
     ai_strengths = Column(Text, nullable=True)
     ai_weaknesses = Column(Text, nullable=True)
     ai_seniority = Column(String(50), nullable=True)
+
+    selected_for_interview = Column(Boolean, default=False, nullable=False)
+    interview_selected_at = Column(DateTime(timezone=True), nullable=True)
 
     keywords = relationship(
         "CandidateKeywordModel",

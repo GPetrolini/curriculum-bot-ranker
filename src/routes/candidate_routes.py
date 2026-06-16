@@ -1,9 +1,19 @@
-from fastapi import APIRouter
+from datetime import datetime
+from typing import List
+from uuid import UUID
+
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
 
 from database.connection import SessionLocal
+from database.models import CandidateModel
 from database.repository import CandidateRepository
 
 router = APIRouter()
+
+
+class InterviewSelectionRequest(BaseModel):
+    candidate_ids: List[UUID]
 
 
 def serialize_candidate(candidate) -> dict:
@@ -31,6 +41,8 @@ def serialize_candidate(candidate) -> dict:
         "ai_strengths": candidate.ai_strengths,
         "ai_weaknesses": candidate.ai_weaknesses,
         "ai_seniority": candidate.ai_seniority,
+        "selected_for_interview": candidate.selected_for_interview,
+        "interview_selected_at": candidate.interview_selected_at,
         "skills": [
             skill.strip()
             for skill in (candidate.ai_strengths or "").split(",")
@@ -53,3 +65,39 @@ def list_candidates():
         "status": "success",
         "candidates": [serialize_candidate(candidate) for candidate in candidates],
     }
+
+
+@router.post("/interview-selection")
+def select_candidates_for_interview(payload: InterviewSelectionRequest):
+    selected_candidates = []
+
+    with SessionLocal() as session:
+        for candidate_id in payload.candidate_ids:
+            candidate = (
+                session.query(CandidateModel)
+                .filter(CandidateModel.id == candidate_id)
+                .first()
+            )
+
+            if not candidate:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Candidato {candidate_id} não encontrado",
+                )
+
+            candidate.selected_for_interview = True
+            candidate.interview_selected_at = datetime.utcnow()
+            selected_candidates.append(candidate)
+
+        session.commit()
+
+        for candidate in selected_candidates:
+            session.refresh(candidate)
+
+        return {
+            "status": "success",
+            "message": "Candidatos selecionados para entrevista com sucesso",
+            "selected_candidates": [
+                serialize_candidate(candidate) for candidate in selected_candidates
+            ],
+        }
