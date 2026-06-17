@@ -48,10 +48,13 @@ async function fetchCandidates(silent = false) {
     document.getElementById("totalCount").textContent =
       candidates.length.toLocaleString("pt-BR");
 
+    dataLoaded = true;
     lastRefresh = Date.now();
     updateStats();
     renderVagaFilters();
-    go();
+
+    // Force update da aba que está ativa no momento, sem importar quando foi clicada
+    updateCurrentView();
   } catch (err) {
     console.error("Erro ao buscar candidatos:", err);
     if (!silent) {
