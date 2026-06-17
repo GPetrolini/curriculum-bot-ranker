@@ -42,12 +42,19 @@ function matchesVaga(candidate, vaga) {
     candidate.ai_summary  || "",
     candidate.cleaned_text || "",
   ].join(" ").toLowerCase();
-  return vagaObj.keywords.some(kw => haystack.includes(kw.toLowerCase()));
+
+  // Usa \b (word boundary) em vez de includes() solto, pra evitar
+  // falso positivo de keyword curta batendo dentro de outra palavra
+  // (ex: keyword "r" casando com "trabalhar", "cs" casando com "fics").
+  return vagaObj.keywords.some(kw => {
+    const escaped = kw.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`\\b${escaped}\\b`, "i").test(haystack);
+  });
 }
 
 // ── Busca e Ordenação ─────────────────────────────────────────────────────────
 
-function go() {
+function getFilteredAndSortedList() {
   const query = document.getElementById("searchInput").value.toLowerCase();
   const sort  = document.getElementById("sortSelect").value;
 
@@ -68,6 +75,10 @@ function go() {
     list = [...list].sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "", "pt"));
   }
 
+  return list;
+}
+
+function go() {
   currentPage = 1;
-  render(list);
+  render(getFilteredAndSortedList());
 }
