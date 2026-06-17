@@ -15,11 +15,17 @@ function updateStats() {
 // ── Navegação entre páginas ───────────────────────────────────────────────────
 
 function showPage(page) {
+  currentView = page;
   document.getElementById("page-candidatos").classList.toggle("hidden", page !== "candidatos");
   document.getElementById("page-selecionados").classList.toggle("hidden", page !== "selecionados");
   document.getElementById("nav-candidatos").classList.toggle("active", page === "candidatos");
   document.getElementById("nav-selecionados").classList.toggle("active", page === "selecionados");
-  if (page === "selecionados") renderSelected();
+  
+  // Se o fetch já terminou, renderiza a aba imediatamente.
+  // Se ainda está carregando, aguarda api.js chamar updateCurrentView() após terminar.
+  if (dataLoaded) {
+    updateCurrentView();
+  }
 }
 
 // ── Lista de Candidatos ───────────────────────────────────────────────────────
@@ -122,28 +128,7 @@ function renderPagination(total, totalPages) {
 
 function goToPage(page) {
   currentPage = page;
-  // Reroda go() sem resetar a página
-  const query = document.getElementById("searchInput").value.toLowerCase();
-  const sort  = document.getElementById("sortSelect").value;
-
-  let list = candidates.filter(c => {
-    const skills = c.skills || [];
-    return (
-      (c.full_name || "").toLowerCase().includes(query) ||
-      (c.email     || "").toLowerCase().includes(query) ||
-      skills.some(s => s.toLowerCase().includes(query))
-    ) && matchesVaga(c, activeVaga);
-  });
-
-  if (sort === "asc") {
-    list = [...list].sort((a, b) => b.final_score - a.final_score);
-  } else if (sort === "desc") {
-    list = [...list].sort((a, b) => a.final_score - b.final_score);
-  } else {
-    list = [...list].sort((a, b) => (a.full_name || "").localeCompare(b.full_name || "", "pt"));
-  }
-
-  render(list);
+  render(getFilteredAndSortedList());
   document.getElementById("list").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
