@@ -3,7 +3,8 @@
 function updateStats() {
   if (!candidates.length) return;
 
-  const otimo = candidates.filter(c => c.ranking_level?.toUpperCase() === "EXCELENTE").length;
+  // Usa o RANKING_MAP via getRanking para não depender de string hardcoded
+  const otimo = candidates.filter(c => getRanking(c.ranking_level).badgeClass === "badge-high").length;
   const pct   = Math.round((otimo / candidates.length) * 100);
   document.getElementById("pctOtimo").textContent = `${pct}%`;
 
