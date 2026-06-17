@@ -17,7 +17,7 @@ def test_home():
 def test_list_candidates(mock_session):
     mock_session_instance = MagicMock()
     mock_session.return_value.__enter__.return_value = mock_session_instance
-    
+
     mock_candidate = MagicMock()
     mock_candidate.id = "test-id"
     mock_candidate.full_name = "Test User"
@@ -42,10 +42,12 @@ def test_list_candidates(mock_session):
     mock_candidate.ai_strengths = None
     mock_candidate.ai_weaknesses = None
     mock_candidate.ai_seniority = None
-    
+    mock_candidate.selected_for_interview = False
+    mock_candidate.interview_selected_at = None
+
     with patch('database.repository.CandidateRepository.get_all') as mock_get_all:
         mock_get_all.return_value = [mock_candidate]
-        
+
         response = client.get("/candidates")
 
         assert response.status_code == 200
@@ -58,10 +60,10 @@ def test_list_candidates(mock_session):
 def test_list_candidates_returns_list(mock_session):
     mock_session_instance = MagicMock()
     mock_session.return_value.__enter__.return_value = mock_session_instance
-    
+
     with patch('database.repository.CandidateRepository.get_all') as mock_get_all:
         mock_get_all.return_value = []
-        
+
         response = client.get("/candidates")
 
         assert response.status_code == 200
@@ -73,7 +75,7 @@ def test_list_candidates_returns_list(mock_session):
 def test_list_candidates_has_required_fields(mock_session):
     mock_session_instance = MagicMock()
     mock_session.return_value.__enter__.return_value = mock_session_instance
-    
+
     mock_candidate = MagicMock()
     mock_candidate.id = "test-id"
     mock_candidate.full_name = "Test User"
@@ -98,10 +100,12 @@ def test_list_candidates_has_required_fields(mock_session):
     mock_candidate.ai_strengths = None
     mock_candidate.ai_weaknesses = None
     mock_candidate.ai_seniority = None
-    
+    mock_candidate.selected_for_interview = False
+    mock_candidate.interview_selected_at = None
+
     with patch('database.repository.CandidateRepository.get_all') as mock_get_all:
         mock_get_all.return_value = [mock_candidate]
-        
+
         response = client.get("/candidates")
 
         assert response.status_code == 200
@@ -113,3 +117,5 @@ def test_list_candidates_has_required_fields(mock_session):
         assert "email" in candidate
         assert "final_score" in candidate
         assert "ranking_level" in candidate
+        assert "selected_for_interview" in candidate
+        assert "interview_selected_at" in candidate

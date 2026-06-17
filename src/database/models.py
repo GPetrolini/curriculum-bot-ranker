@@ -63,6 +63,9 @@ class CandidateModel(Base):
     select_for_interview = Column(Boolean, default=False, nullable=True)
     interview_select_atc = Column(Boolean, default=False, nullable=True)
 
+    selected_for_interview = Column(Boolean, default=False, nullable=False)
+    interview_selected_at = Column(DateTime(timezone=True), nullable=True)
+
     keywords = relationship(
         "CandidateKeywordModel",
         back_populates="candidate",
