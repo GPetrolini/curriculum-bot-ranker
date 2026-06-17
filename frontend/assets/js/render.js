@@ -3,7 +3,7 @@
 function updateStats() {
   if (!candidates.length) return;
 
-  const otimo = candidates.filter(c => c.ranking_level === "ÓTIMO").length;
+  const otimo = candidates.filter(c => c.ranking_level?.toUpperCase() === "EXCELENTE").length;
   const pct   = Math.round((otimo / candidates.length) * 100);
   document.getElementById("pctOtimo").textContent = `${pct}%`;
 
