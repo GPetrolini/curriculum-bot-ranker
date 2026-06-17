@@ -1,8 +1,8 @@
 import sys
-sys.path.insert(0, 'src')
-
 from database.connection import engine
 from sqlalchemy import text
+
+sys.path.insert(0, 'src')
 
 with engine.connect() as conn:
     result = conn.execute(

@@ -24,12 +24,18 @@ class ResumeAnalyzeRequest(BaseModel):
 @router.post("/analyze")
 async def analyze_resume(request: ResumeAnalyzeRequest):
     try:
-        logger.info(f"Iniciando análise para candidate_id={request.candidate_id}, file_name={request.file_name}")
+        logger.info(
+            f"Iniciando análise para candidate_id={request.candidate_id}, "
+            f"file_name={request.file_name}"
+        )
         analysis_result = analyze_existing_candidate(
             candidate_id=request.candidate_id,
             file_name=request.file_name,
         )
-        logger.info(f"Análise concluída para candidate_id={analysis_result['candidate_id']}, nome={analysis_result['name']}")
+        logger.info(
+            f"Análise concluída para candidate_id={analysis_result['candidate_id']}, "
+            f"nome={analysis_result['name']}"
+        )
 
         return {
             "status": "success",
