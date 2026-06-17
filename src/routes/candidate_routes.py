@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
@@ -73,7 +74,6 @@ def list_candidates():
 
 @router.post("/interview-selection")
 def select_candidates_for_interview(payload: InterviewSelectionRequest):
-    from datetime import datetime
     selected_candidates = []
 
     with SessionLocal() as session:
