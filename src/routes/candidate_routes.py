@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
@@ -14,6 +14,11 @@ router = APIRouter()
 
 class InterviewSelectionRequest(BaseModel):
     candidate_ids: List[UUID]
+
+
+class InterviewSelectionUpdate(BaseModel):
+    selected_for_interview: Optional[bool] = None
+    interview_selected_at: Optional[datetime] = None
 
 
 def serialize_candidate(candidate) -> dict:
@@ -101,3 +106,28 @@ def select_candidates_for_interview(payload: InterviewSelectionRequest):
                 serialize_candidate(candidate) for candidate in selected_candidates
             ],
         }
+
+
+@router.put("/{candidate_id}/interview-selection")
+def update_interview_selection(candidate_id: str, update: InterviewSelectionUpdate):
+    with SessionLocal() as session:
+        candidate = session.query(CandidateModel).filter(
+            CandidateModel.id == candidate_id
+        ).first()
+        
+        if not candidate:
+            raise HTTPException(status_code=404, detail="Candidato não encontrado")
+        
+        if update.selected_for_interview is not None:
+            candidate.selected_for_interview = update.selected_for_interview
+        
+        if update.interview_selected_at is not None:
+            candidate.interview_selected_at = update.interview_selected_at
+        
+        session.commit()
+        session.refresh(candidate)
+    
+    return {
+        "status": "success",
+        "candidate": serialize_candidate(candidate)
+    }

@@ -60,7 +60,6 @@ class CandidateModel(Base):
     ai_strengths = Column(Text, nullable=True)
     ai_weaknesses = Column(Text, nullable=True)
     ai_seniority = Column(String(50), nullable=True)
-
     selected_for_interview = Column(Boolean, default=False, nullable=False)
     interview_selected_at = Column(DateTime(timezone=True), nullable=True)
 
