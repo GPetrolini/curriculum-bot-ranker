@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
 
@@ -17,8 +16,8 @@ class InterviewSelectionRequest(BaseModel):
 
 
 class InterviewSelectionUpdate(BaseModel):
-    select_for_interview: Optional[bool] = None
-    interview_select_atc: Optional[bool] = None
+    selected_for_interview: Optional[bool] = None
+    interview_selected_at: Optional[datetime] = None
 
 
 def serialize_candidate(candidate) -> dict:
@@ -46,8 +45,8 @@ def serialize_candidate(candidate) -> dict:
         "ai_strengths": candidate.ai_strengths,
         "ai_weaknesses": candidate.ai_weaknesses,
         "ai_seniority": candidate.ai_seniority,
-        "select_for_interview": candidate.select_for_interview,
-        "interview_select_atc": candidate.interview_select_atc,
+        "selected_for_interview": candidate.selected_for_interview,
+        "interview_selected_at": candidate.interview_selected_at,
         "skills": [
             skill.strip()
             for skill in (candidate.ai_strengths or "").split(",")
@@ -74,6 +73,7 @@ def list_candidates():
 
 @router.post("/interview-selection")
 def select_candidates_for_interview(payload: InterviewSelectionRequest):
+    from datetime import datetime
     selected_candidates = []
 
     with SessionLocal() as session:
@@ -90,7 +90,8 @@ def select_candidates_for_interview(payload: InterviewSelectionRequest):
                     detail=f"Candidato {candidate_id} não encontrado",
                 )
 
-            candidate.select_for_interview = True
+            candidate.selected_for_interview = True
+            candidate.interview_selected_at = datetime.utcnow()
             selected_candidates.append(candidate)
 
         session.commit()
@@ -117,11 +118,11 @@ def update_interview_selection(candidate_id: str, update: InterviewSelectionUpda
         if not candidate:
             raise HTTPException(status_code=404, detail="Candidato não encontrado")
         
-        if update.select_for_interview is not None:
-            candidate.select_for_interview = update.select_for_interview
+        if update.selected_for_interview is not None:
+            candidate.selected_for_interview = update.selected_for_interview
         
-        if update.interview_select_atc is not None:
-            candidate.interview_select_atc = update.interview_select_atc
+        if update.interview_selected_at is not None:
+            candidate.interview_selected_at = update.interview_selected_at
         
         session.commit()
         session.refresh(candidate)
