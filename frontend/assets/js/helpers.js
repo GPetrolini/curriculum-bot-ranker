@@ -22,7 +22,10 @@ function getInitials(name) {
 }
 
 function formatScore(score) {
-  return Number(score).toFixed(1);
+  // Gambiarra: limita visualmente em 100, já que o backend pode
+  // mandar um score acima disso por bug no cálculo de keywords.
+  const capped = Math.min(Number(score), 100);
+  return capped.toFixed(1);
 }
 
 /**
