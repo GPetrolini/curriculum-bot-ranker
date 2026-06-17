@@ -51,7 +51,8 @@ def startup_event() -> None:
         import time
         import logging
         logger = logging.getLogger(__name__)
-        api_url = "http://localhost:8000/process"
+        process_url = "http://localhost:8000/process"
+        analyze_url = "http://localhost:8000/resume/analyze-missing"
         interval = getattr(settings, 'BACKGROUND_WORKER_INTERVAL', 30)
 
         print(f"=== WORKER INICIADO (intervalo: {interval}s) ===")
@@ -63,8 +64,9 @@ def startup_event() -> None:
 
         while True:
             try:
-                print(f"=== WORKER CHAMANDO API: {api_url} ===")
-                response = requests.post(api_url, timeout=30)
+                # Processar PDFs pendentes
+                print(f"=== WORKER CHAMANDO API: {process_url} ===")
+                response = requests.post(process_url, timeout=30)
                 if response.status_code == 200:
                     result = response.json()
                     processed = result.get("processed", 0)
@@ -73,6 +75,19 @@ def startup_event() -> None:
                         logger.info(f"Worker: {processed} PDFs processados")
                 else:
                     print(f"=== WORKER: API retornou status {response.status_code} ===")
+
+                # Processar candidatos sem resumo de IA
+                print(f"=== WORKER CHAMANDO API: {analyze_url} ===")
+                response = requests.post(analyze_url, timeout=60)
+                if response.status_code == 200:
+                    result = response.json()
+                    processed = result.get("processed", 0)
+                    print(f"=== WORKER: {processed} currículos analisados por IA ===")
+                    if processed > 0:
+                        logger.info(f"Worker: {processed} currículos analisados por IA")
+                else:
+                    print(f"=== WORKER: API retornou status {response.status_code} ===")
+
                 time.sleep(interval)
             except Exception as exc:
                 print(f"=== WORKER ERROR: {exc} ===")
