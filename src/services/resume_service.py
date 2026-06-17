@@ -1,3 +1,4 @@
+import logging
 import re
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -10,6 +11,9 @@ from database.repository import CandidateRepository, VacancyRepository
 from services.pdf_extractor import PDFExtractor
 from services.keyword_analyzer import KeywordAnalyzer
 from services.ranking_engine import RankingEngine
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 extractor = PDFExtractor()
 analyzer = KeywordAnalyzer()
@@ -196,12 +200,16 @@ def analyze_missing_candidates() -> Dict[str, Any]:
 
     with SessionLocal() as session:
         candidates = CandidateRepository.get_without_ai_summary(session)
+        logger.info(f"Encontrados {len(candidates)} candidatos sem resumo de IA")
+
         for candidate in candidates:
             text_to_use = candidate.cleaned_text or candidate.extracted_text
             if not text_to_use:
+                logger.warning(f"Candidato {candidate.id} não tem texto extraído, pulando")
                 skipped_ids.append(str(candidate.id))
                 continue
 
+            logger.info(f"Processando candidato {candidate.id} - {candidate.full_name}")
             ai_analysis = analyze_resume_text(text_to_use)
             ai_data = parse_ai_analysis(ai_analysis)
 
@@ -220,6 +228,7 @@ def analyze_missing_candidates() -> Dict[str, Any]:
 
             candidate = CandidateRepository.update_candidate(session, candidate, updates)
             processed_ids.append(str(candidate.id))
+            logger.info(f"Candidato {candidate.id} processado com sucesso")
 
     return {
         "processed": len(processed_ids),

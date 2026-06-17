@@ -82,8 +82,21 @@ class PDFExtractor:
         return match.group(0).strip() if match else None
 
     def _search_name(self, text: str) -> Optional[str]:
-        match = re.search(r"(?:nome|name)\s*[:\-]?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,4})", text)
-        return match.group(1).strip() if match else None
+        # Tenta encontrar nome com padrões comuns em currículos
+        patterns = [
+            r"(?:nome|name)\s*[:\-]?\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,4})",
+            r"(?:curriculum|currículo|cv|resume).*?([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})",  # Nome após header
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE)
+            if match and match.lastindex >= 1:
+                name = match.group(1).strip()
+                # Verifica se parece um nome válido (não muito longo, não tem números)
+                if len(name.split()) >= 2 and len(name.split()) <= 4 and not any(c.isdigit() for c in name):
+                    return name
+        
+        return None
 
     def _guess_full_name(self, text: str) -> Optional[str]:
         lines = [line.strip() for line in text.splitlines() if line.strip()]

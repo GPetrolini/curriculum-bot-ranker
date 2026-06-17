@@ -19,6 +19,20 @@ with engine.connect() as conn:
         columns = [row[0] for row in result]
         print("Colunas da candidates:", columns)
 
+        # Verificar candidatos sem ai_summary
+        result = conn.execute(
+            text("SELECT COUNT(*) FROM candidates WHERE ai_summary IS NULL")
+        )
+        count = result.scalar()
+        print(f"Candidatos sem ai_summary: {count}")
+
+        # Verificar candidatos com ai_summary
+        result = conn.execute(
+            text("SELECT COUNT(*) FROM candidates WHERE ai_summary IS NOT NULL")
+        )
+        count = result.scalar()
+        print(f"Candidatos com ai_summary: {count}")
+
         # Verificar se as colunas específicas existem
         if 'select_for_interview' in [c.lower() for c in columns]:
             print("Coluna select_for_interview existe")
